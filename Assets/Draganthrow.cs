@@ -4,55 +4,71 @@ public class Dragandthrow : MonoBehaviour
 {
     private Rigidbody rb;
     private bool isShoot = false;
-    private Vector3 mousePressdownpos;
-    private Vector3 mouseReleasepos;
+    private Transform playerTransform;
+
+    [Header("Ustawienia dystansu")]
+    public float interactionDistance = 5f; // Jak blisko musisz być, by kursor się pojawił
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
 
-       
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
-        Debug.Log("Skrypt gotowy! Kliknij na kulę, żeby rzucić.");
+        // Szukamy gracza w scenie po Tagu
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        
+        if (player != null)
+        {
+            playerTransform = player.transform;
+        }
+        else
+        {
+            Debug.LogError("Nie znaleziono obiektu z tagiem 'Player'! Ustaw tag na swoim graczu.");
+        }
     }
 
     void Update()
     {
-        
-        if (Input.anyKeyDown)
+        // Jeśli już rzuciliśmy kulą, nie chcemy, żeby kursor nadal wariował przez tę kulę
+        if (playerTransform == null || isShoot) return;
+
+        // Obliczamy dystans między TYM obiektem (kulą) a graczem
+        float distance = Vector3.Distance(transform.position, playerTransform.position);
+
+        // Zarządzanie kursorem zależnie od dystansu
+        if (distance <= interactionDistance)
         {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
+        else
+        {
+            // Możesz to zakomentować, jeśli masz wiele kul i nie chcesz, 
+            // żeby jedna kula wyłączała kursor, gdy inna jest blisko.
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
+    // Wykrywa kliknięcie myszką na obiekt (wymaga Collidera na kuli!)
     void OnMouseDown()
     {
-        Debug.Log("Złapałaś kulę!");
-        mousePressdownpos = Input.mousePosition;
+        if (isShoot) return;
+        Debug.Log("Złapałaś kulę: " + gameObject.name);
     }
 
     void OnMouseUp()
     {
         if (isShoot) return;
 
-        mouseReleasepos = Input.mousePosition;
-        
         if (Camera.main != null)
         {
-            Ray ray = Camera.main.ScreenPointToRay(mouseReleasepos);
+            // Tworzymy promień z miejsca, gdzie puściliśmy myszkę
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit))
             {
-                Debug.Log("Celujesz w: " + hit.collider.name);
                 Shoot(hit.point);
-            }
-            else
-            {
-                Debug.LogWarning("Nie trafiłaś w nic! Celuj w podłogę lub puszki.");
             }
         }
     }
@@ -60,13 +76,17 @@ public class Dragandthrow : MonoBehaviour
     void Shoot(Vector3 target)
     {
         isShoot = true;
-        Vector3 direction = (target - transform.position).normalized;
         
-       
-       direction += Vector3.up * 0.03f;
+        // Po strzale kursor powinien zniknąć, bo już nie sterujemy tą kulą
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        Vector3 direction = (target - transform.position).normalized;
+        direction += Vector3.up * 0.1f; // Lekka parabola do góry
 
         rb.AddForce(direction * 100f, ForceMode.Impulse);
+        
+        // Usuwamy kulę po 5 sekundach, żeby nie zaśmiecać sceny
         Destroy(gameObject, 5f);
-        Debug.Log("Kula wystrzelona!");
     }
 }

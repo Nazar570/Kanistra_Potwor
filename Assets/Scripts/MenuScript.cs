@@ -6,7 +6,7 @@ public class MenuScript : MonoBehaviour
     public void Graj()
     {
         // Ładuje scenę o nazwie "GameScene"
-        SceneManager.LoadScene("City");
+        SceneManager.LoadScene("Game Start");
     }
 
     public void Wyjdz()
