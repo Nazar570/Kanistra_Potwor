@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
 
 public class CarInteraction : MonoBehaviour
 {
@@ -12,23 +11,22 @@ public class CarInteraction : MonoBehaviour
     [Header("Ustawienia Jazdy")]
     public float driveSpeed = 15f;
     public float driveDuration = 3f;
-    public float distanceToEnter = 5f; // Jak blisko musisz być auta, żeby wsiąść
+    public float distanceToEnter = 5f;
 
     [Header("Referencje UI")]
     public Image faderImage;
 
+    // NOWOŚĆ: Blokada, która uratuje nas przed restartem sceny
+    [HideInInspector]
+    public bool zablokowanyNaTejScenie = false;
+
     private bool isDriving = false;
-    private Camera mainCam;
+    private Transform playerTransform;
 
     void Start()
     {
-        // Szukamy kamery i przypisujemy ją na stałe
-        mainCam = Camera.main;
-        
-        if (mainCam == null)
-        {
-            Debug.LogError("BŁĄD: Twoja kamera nie ma Tagu 'MainCamera'! Ustaw go w Inspektorze kamery.");
-        }
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) playerTransform = player.transform;
 
         if (faderImage == null)
         {
@@ -38,59 +36,62 @@ public class CarInteraction : MonoBehaviour
 
     void Update()
     {
+        // Jeśli skrypt jest zablokowany logicznie, nic nie rób
+        if (zablokowanyNaTejScenie) return;
+
         if (isDriving)
         {
             transform.Translate(Vector3.forward * driveSpeed * Time.deltaTime);
             return;
         }
 
-        // Jeśli klikniesz Prawy Przycisk Myszy
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            HandleClick();
+            HandleInteraction();
         }
     }
 
-    void HandleClick()
+    void HandleInteraction()
     {
-        if (mainCam == null) mainCam = Camera.main;
-        if (mainCam == null) return;
+        // Jeśli skrypt jest zablokowany logicznie, ignoruj wywołanie (również przez SendMessage)
+        if (zablokowanyNaTejScenie) return;
 
-        // Strzał w środek ekranu (tam gdzie patrzysz)
-        Ray ray = mainCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, distanceToEnter))
+        if (playerTransform == null)
         {
-            // Sprawdzenie czy trafiliśmy w to auto lub jego części
-            if (hit.transform == this.transform || hit.transform.IsChildOf(this.transform))
-            {
-                StartCoroutine(StartCarSequence());
-            }
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) playerTransform = player.transform;
+            else return;
+        }
+
+        float dystans = Vector3.Distance(playerTransform.position, transform.position);
+
+        if (dystans <= distanceToEnter)
+        {
+            StartCoroutine(StartCarSequence());
         }
     }
 
     IEnumerator StartCarSequence()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) yield break;
+        if (playerTransform == null) yield break;
+        GameObject player = playerTransform.gameObject;
 
-        // 1. Teleportacja
+        CarDriving cd = GetComponent<CarDriving>();
+        if (cd != null) cd.enabled = false;
+
         CharacterController cc = player.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
 
         player.transform.SetParent(this.transform);
-        player.transform.localPosition = new Vector3(-0.3f, -0.31f, 1.23f); 
+        player.transform.localPosition = new Vector3(-0.3f, -0.31f, 1.23f);
         player.transform.localRotation = Quaternion.identity;
 
-        // 2. Jazda i ukrycie kursora (na wypadek gdyby był widoczny)
         isDriving = true;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
         yield return new WaitForSeconds(driveDuration);
 
-        // 3. Ściemnianie
         if (faderImage != null)
         {
             float timer = 0;

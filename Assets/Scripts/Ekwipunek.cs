@@ -2,43 +2,47 @@ using UnityEngine;
 
 public class Ekwipunek : MonoBehaviour
 {
-    // Globalna pamięć gry (static sprawia, że dane zostają w pamięci po restarcie)
+    // Stare przedmioty
     public static bool maLom = false;
     public static bool maKlucz = false;
+
+    // NOWE przedmioty do auta
+    public static bool maAkumulator = false;
+    public static bool maSwiecaZaplonowa = false;
+    public static bool maKanister = false;
 
     [Header("Twoje Obrazki z Canvasu")]
     public GameObject uiObrazekLom;
     public GameObject uiObrazekKlucz;
+    public GameObject uiObrazekAkumulator;
+    public GameObject uiObrazekSwieca;
+    public GameObject uiObrazekKanister;
 
     [Header("Sterowanie Awaryjne")]
     public float predkoscObrotu = 120f;
 
     void Start()
     {
-        // KLUCZOWE: Resetujemy przedmioty przy starcie każdej sceny
         maLom = false;
         maKlucz = false;
-        Debug.Log("Ekwipunek został wyczyszczony na starcie sceny.");
+        maAkumulator = false;
+        maSwiecaZaplonowa = false;
+        maKanister = false;
+        Debug.Log("Ekwipunek wyczyszczony.");
     }
 
     void Update()
     {
-        // 1. OBSŁUGA EKWIPUNKU (pokazywanie ikon na ekranie)
         if (uiObrazekLom != null) uiObrazekLom.SetActive(maLom);
         if (uiObrazekKlucz != null) uiObrazekKlucz.SetActive(maKlucz);
+        if (uiObrazekAkumulator != null) uiObrazekAkumulator.SetActive(maAkumulator);
+        if (uiObrazekSwieca != null) uiObrazekSwieca.SetActive(maSwiecaZaplonowa);
+        if (uiObrazekKanister != null) uiObrazekKanister.SetActive(maKanister);
 
-        // 2. OBRACANIE KLAWIATURĄ
         if (Input.GetKey(KeyCode.Q))
-        {
             transform.Rotate(0, -predkoscObrotu * Time.deltaTime, 0);
-        }
-
         if (Input.GetKey(KeyCode.E))
-        {
             transform.Rotate(0, predkoscObrotu * Time.deltaTime, 0);
-        }
-        
-        // 3. BLOKADA KURSORA
         if (Input.GetKeyDown(KeyCode.L))
         {
             Cursor.lockState = CursorLockMode.Locked;

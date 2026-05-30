@@ -54,11 +54,13 @@ public class OdbierzNagrode : MonoBehaviour
     void Odbierz()
     {
         odebrano = true;
-
         if (typNagrody == "bateria")
         {
             if (model3DBaterii != null)
                 model3DBaterii.SetActive(true);
+
+            Ekwipunek.maAkumulator = true; // NOWE!
+            Debug.Log("[NAGRODA] Akumulator dodany do ekwipunku!");
 
             if (scoreManager != null)
                 scoreManager.CzyscTekstPoOdebraniuNagrody();
@@ -68,11 +70,12 @@ public class OdbierzNagrode : MonoBehaviour
             if (model3DSwieca != null)
                 model3DSwieca.SetActive(true);
 
+            Ekwipunek.maSwiecaZaplonowa = true; // NOWE!
+            Debug.Log("[NAGRODA] Świeca zapłonowa dodana do ekwipunku!");
+
             if (puszkiManager != null)
                 puszkiManager.CzyscTekst();
         }
-
         Destroy(nagrodaNaZiemi);
-        Debug.Log($"[NAGRODA] Odebrano: {typNagrody}");
     }
 }
