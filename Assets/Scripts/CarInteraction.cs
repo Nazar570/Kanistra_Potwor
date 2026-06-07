@@ -16,12 +16,17 @@ public class CarInteraction : MonoBehaviour
     [Header("Referencje UI")]
     public Image faderImage;
 
+    [Header("NOWOŚĆ: Ustawienia Podpowiedzi (Hint)")]
+    [SerializeField] private string hintMessage = "Chyba ten samochód to moja jedyna opcja, żeby gdzieś się dostać...";
+    [SerializeField] private float hintDuration = 3f;
+
     // NOWOŚĆ: Blokada, która uratuje nas przed restartem sceny
     [HideInInspector]
     public bool zablokowanyNaTejScenie = false;
 
     private bool isDriving = false;
     private Transform playerTransform;
+    private HintManager hintManager; // Referencja do Twojego HintManagera
 
     void Start()
     {
@@ -31,6 +36,13 @@ public class CarInteraction : MonoBehaviour
         if (faderImage == null)
         {
             Debug.LogError("Zapomniałeś przypisać Fader Image na aucie!");
+        }
+
+        // Automatycznie szukamy HintManagera na scenie, żebyś nie musiał go przeciągać ręcznie
+        hintManager = Object.FindFirstObjectByType<HintManager>();
+        if (hintManager == null)
+        {
+            Debug.LogWarning("Nie znaleziono HintManagera na scenie! Napisy nie będą się wyświetlać.");
         }
     }
 
@@ -107,5 +119,40 @@ public class CarInteraction : MonoBehaviour
         }
 
         SceneManager.LoadScene(nextSceneName);
+    }
+
+    // ==========================================
+    // NOWOŚĆ: WYKRYWANIE ZETKNIĘCIA Z POJAZDEM
+    // ==========================================
+
+    // Wersja 1: Jeśli gracz fizycznie wpada na auto (zwykła kolizja)
+   private void OnCollisionEnter(Collision collision)
+    {
+        // Ta linijka wypisze w konsoli nazwę wszystkiego, co dotknie auta:
+        Debug.Log("Auto dotknięte przez (Collision): " + collision.gameObject.name);
+
+        if (collision.gameObject.CompareTag("Player") && !isDriving && !zablokowanyNaTejScenie)
+        {
+            TriggerCarHint();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Ta linijka wypisze w konsoli nazwę wszystkiego, w co auto wejdzie (Trigger):
+        Debug.Log("Auto przeniknięte przez (Trigger): " + other.gameObject.name);
+
+        if (other.CompareTag("Player") && !isDriving && !zablokowanyNaTejScenie)
+        {
+            TriggerCarHint();
+        }
+    }
+
+    private void TriggerCarHint()
+    {
+        if (hintManager != null)
+        {
+            hintManager.ShowHint(hintMessage, hintDuration);
+        }
     }
 }

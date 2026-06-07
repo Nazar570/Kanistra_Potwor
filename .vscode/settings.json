@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Kanistra_Potwor-develop.slnx",
+    "dotnet.defaultSolution": "Kanistra_Potwor.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }

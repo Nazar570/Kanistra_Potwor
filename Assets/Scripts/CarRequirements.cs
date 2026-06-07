@@ -3,10 +3,10 @@ using TMPro;
 
 public class CarRequirements : MonoBehaviour
 {
-    [Header("UI - Tekst przy aucie")]
+    [Header("UI - Opcjonalny prosty napis (np. [E] Interakcja)")]
     public TextMeshProUGUI interactionText;
 
-    [Header("Referencje do skryptÛw")]
+    [Header("Referencje do skrypt√≥w")]
     public CarDriving carDriving;
     public CarInteraction carInteraction;
 
@@ -19,10 +19,16 @@ public class CarRequirements : MonoBehaviour
     public bool blokadaWsiadania = false;
     public float czasBlokady = 0f;
 
+    private HintManager hintManager; // System podpowiedzi
+    private MonoBehaviour playerMovementScript; // Zapamiƒôtany skrypt ruchu gracza
+
     void Start()
     {
         if (carDriving != null) carDriving.enabled = false;
         if (carInteraction != null) carInteraction.enabled = false;
+
+        // Automatycznie szukamy HintManagera na tej scenie
+        hintManager = Object.FindFirstObjectByType<HintManager>();
     }
 
     void Update()
@@ -37,7 +43,8 @@ public class CarRequirements : MonoBehaviour
             return;
         }
 
-        AktualizujTekst();
+        // NOWO≈öƒÜ/POWR√ìT: Wysy≈Çamy tekst do HintManagera na bie≈ºƒÖco, gdy gracz stoi obok auta
+        AktualizujHintWUpdate();
 
         if (!akumulatorZalozony || !swiecaZalozona || !kanisterZalany)
         {
@@ -74,7 +81,7 @@ public class CarRequirements : MonoBehaviour
             OdbierzNagrode odbiornik = FindFirstObjectByType<OdbierzNagrode>();
             if (odbiornik != null && odbiornik.model3DSwieca != null)
                 odbiornik.model3DSwieca.SetActive(false);
-            Debug.Log("åwieca zap≥onowa zamontowana!");
+            Debug.Log("≈öwieca zap≈Çonowa zamontowana!");
             cosZmieniono = true;
         }
 
@@ -84,15 +91,20 @@ public class CarRequirements : MonoBehaviour
             Ekwipunek.maKanister = false;
             Debug.Log("Paliwo wlane!");
             cosZmieniono = true;
+
+            // WYWO≈ÅANIE EVENTU: Szukamy skryptu obs≈ÇugujƒÖcego atak nied≈∫wiedzia i go odpalamy
+            BearAttackEvent bearEvent = Object.FindFirstObjectByType<BearAttackEvent>();
+            if (bearEvent != null)
+            {
+                bearEvent.TriggerBearAttack(playerMovementScript);
+            }
         }
 
         if (!cosZmieniono)
-            Debug.Log("Nie masz nic do w≥oøenia do auta.");
+            Debug.Log("Nie masz nic do w≈Ço≈ºenia do auta.");
 
         if (akumulatorZalozony && swiecaZalozona && kanisterZalany)
         {
-            if (interactionText != null)
-                interactionText.text = "Auto gotowe! Naciúnij [E], aby wsiπúÊ";
             if (carDriving != null) carDriving.enabled = true;
             if (carInteraction != null) carInteraction.enabled = false;
         }
@@ -105,6 +117,10 @@ public class CarRequirements : MonoBehaviour
             wAucie = true;
             carDriving.enabled = true;
             carDriving.WymusWsiadanieBezposrednie();
+            
+            // Ukrywamy panel hinta po wsiadaniu, ≈ºeby nie wisia≈Ç na ekranie
+            if (hintManager != null && hintManager.hintPanel != null)
+                hintManager.hintPanel.SetActive(false);
         }
     }
 
@@ -113,13 +129,14 @@ public class CarRequirements : MonoBehaviour
         wAucie = false;
     }
 
-    void AktualizujTekst()
+    // Nowa wersja starej funkcji - teraz karmi danymi HintManagera
+    void AktualizujHintWUpdate()
     {
-        if (interactionText == null) return;
+        if (hintManager == null) return;
 
         if (akumulatorZalozony && swiecaZalozona && kanisterZalany)
         {
-            interactionText.text = "Auto gotowe! Naciúnij [E], aby wsiπúÊ";
+            hintManager.ShowHint("Auto gotowe! Naci≈õnij [E], aby wsiƒÖ≈õƒá", 0.5f);
             return;
         }
 
@@ -127,20 +144,22 @@ public class CarRequirements : MonoBehaviour
 
         if (!akumulatorZalozony)
             tekst += Ekwipunek.maAkumulator
-                ? "Naciúnij [F] aby za≥oøyÊ akumulator\n"
+                ? "Naci≈õnij [F] aby za≈Ço≈ºyƒá akumulator\n"
                 : "Potrzebny akumulator!\n";
 
         if (!swiecaZalozona)
             tekst += Ekwipunek.maSwiecaZaplonowa
-                ? "Naciúnij [F] aby za≥oøyÊ úwiecÍ zap≥onowπ\n"
-                : "Potrzebna úwieca zap≥onowa!\n";
+                ? "Naci≈õnij [F] aby za≈Ço≈ºyƒá ≈õwiecƒô zap≈ÇonowƒÖ\n"
+                : "Potrzebna ≈õwieca zap≈Çonowa!\n";
 
         if (!kanisterZalany)
-            tekst += Ekwipunek.maKanister
-                ? "Naciúnij [F] aby wlaÊ paliwo\n"
-                : "Potrzebne paliwo!\n";
+            tekst = Ekwipunek.maKanister
+                ? "Naci≈õnij [F] aby wlaƒá paliwo\n"
+                : "Pusty bak\n Mo≈ºe gdzie≈õ znajdƒô trochƒô benzyny...";
 
-        interactionText.text = tekst.TrimEnd();
+        // Wysy≈Çamy tekst co klatkƒô z bardzo kr√≥tkim czasem wy≈õwietlania (0.5 sekundy),
+        // dziƒôki czemu podpowied≈∫ zniknie od razu po odej≈õciu od auta
+        hintManager.ShowHint(tekst.TrimEnd(), 0.5f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -148,8 +167,13 @@ public class CarRequirements : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = true;
-            if (interactionText != null)
-                interactionText.gameObject.SetActive(true);
+
+            // Zapisujemy skrypt ruchu gracza, kt√≥ry wszed≈Ç w trigger
+            playerMovementScript = other.GetComponent<MonoBehaviour>();
+
+            // UWAGA: Je≈õli Tw√≥j skrypt ruchu to np. FirstPersonController i ukrywa siƒô g≈Çƒôbiej, 
+            // w razie problem√≥w podmie≈Ñ linijkƒô wy≈ºej na:
+            // playerMovementScript = other.GetComponent("FirstPersonController") as MonoBehaviour;
         }
     }
 
@@ -157,12 +181,13 @@ public class CarRequirements : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Nie resetuj jeúli gracz w≥aúnie wsiad≥ do auta
             if (wAucie) return;
 
             isPlayerNear = false;
-            if (interactionText != null)
-                interactionText.gameObject.SetActive(false);
+            
+            // Po odej≈õciu od auta natychmiast gasimy panel HintManagera
+            if (hintManager != null && hintManager.hintPanel != null)
+                hintManager.hintPanel.SetActive(false);
         }
     }
 }

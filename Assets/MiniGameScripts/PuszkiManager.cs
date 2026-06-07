@@ -41,7 +41,7 @@ public class PuszkiManager : MonoBehaviour
     private List<GameObject> aktywnePuszki = new List<GameObject>();
     private List<GameObject> aktywneKule = new List<GameObject>();
 
-    void Start()
+    void OnEnable()
     {
         if (tekstKomunikatowUI != null)
             tekstKomunikatowUI.gameObject.SetActive(false);
