@@ -10,6 +10,10 @@ public class CarRequirements : MonoBehaviour
     public CarDriving carDriving;
     public CarInteraction carInteraction;
 
+    [Header("NOWOŚĆ: System Zasadzki i Ścieżki")]
+    public AmbushTrigger ambushTriggerScript;
+    public AmbushPath ambushPathScript;
+
     private bool isPlayerNear = false;
     private bool akumulatorZalozony = false;
     private bool swiecaZalozona = false;
@@ -19,15 +23,13 @@ public class CarRequirements : MonoBehaviour
     public bool blokadaWsiadania = false;
     public float czasBlokady = 0f;
 
-    private HintManager hintManager; // System podpowiedzi
-    private MonoBehaviour playerMovementScript; // Zapamiętany skrypt ruchu gracza
+    private HintManager hintManager;
+    private MonoBehaviour playerMovementScript;
 
     void Start()
     {
         if (carDriving != null) carDriving.enabled = false;
         if (carInteraction != null) carInteraction.enabled = false;
-
-        // Automatycznie szukamy HintManagera na tej scenie
         hintManager = Object.FindFirstObjectByType<HintManager>();
     }
 
@@ -43,7 +45,6 @@ public class CarRequirements : MonoBehaviour
             return;
         }
 
-        // NOWOŚĆ/POWRÓT: Wysyłamy tekst do HintManagera na bieżąco, gdy gracz stoi obok auta
         AktualizujHintWUpdate();
 
         if (!akumulatorZalozony || !swiecaZalozona || !kanisterZalany)
@@ -92,7 +93,6 @@ public class CarRequirements : MonoBehaviour
             Debug.Log("Paliwo wlane!");
             cosZmieniono = true;
 
-            // WYWOŁANIE EVENTU: Szukamy skryptu obsługującego atak niedźwiedzia i go odpalamy
             BearAttackEvent bearEvent = Object.FindFirstObjectByType<BearAttackEvent>();
             if (bearEvent != null)
             {
@@ -103,10 +103,22 @@ public class CarRequirements : MonoBehaviour
         if (!cosZmieniono)
             Debug.Log("Nie masz nic do włożenia do auta.");
 
+        // SPRAWDZENIE: Jeśli wszystkie części są na miejscu, odpalamy wołanie oraz nową ścieżkę!
         if (akumulatorZalozony && swiecaZalozona && kanisterZalany)
         {
             if (carDriving != null) carDriving.enabled = true;
             if (carInteraction != null) carInteraction.enabled = false;
+
+            if (ambushTriggerScript != null)
+            {
+                ambushTriggerScript.ActivateAmbushSequence();
+            }
+
+            // POPRAWKA: Odpalamy funkcję aktywacji ścieżki
+            if (ambushPathScript != null)
+            {
+                ambushPathScript.ActivatePath();
+            }
         }
     }
 
@@ -117,8 +129,7 @@ public class CarRequirements : MonoBehaviour
             wAucie = true;
             carDriving.enabled = true;
             carDriving.WymusWsiadanieBezposrednie();
-            
-            // Ukrywamy panel hinta po wsiadaniu, żeby nie wisiał na ekranie
+
             if (hintManager != null && hintManager.hintPanel != null)
                 hintManager.hintPanel.SetActive(false);
         }
@@ -129,37 +140,35 @@ public class CarRequirements : MonoBehaviour
         wAucie = false;
     }
 
-    // Nowa wersja starej funkcji - teraz karmi danymi HintManagera
     void AktualizujHintWUpdate()
     {
         if (hintManager == null) return;
 
+        // ETAP 3: Wszystko jest naprawione -> Aktywujemy wołanie z budynku!
         if (akumulatorZalozony && swiecaZalozona && kanisterZalany)
         {
-            hintManager.ShowHint("Auto gotowe! Naciśnij [E], aby wsiąść", 0.5f);
+            hintManager.ShowHint("Auto gotowe!\n...Czekaj, słyszę krzyk z budynku obok! Muszę to sprawdzić!", 0.5f);
             return;
         }
 
-        string tekst = "";
+        // ETAP 1: Paliwo jeszcze nie jest wlane -> Pokazujemy TYLKO napisy dotyczące benzyny
+        if (!kanisterZalany)
+        {
+            string tekstPaliwa = Ekwipunek.maKanister ? "Naciśnij [F] aby wlać paliwo\n" : "Pusty bak\n Może gdzieś znajdę trochę benzyny...";
+            hintManager.ShowHint(tekstPaliwa.TrimEnd(), 0.5f);
+            return;
+        }
+
+        // ETAP 2: Paliwo wlane (zwierzak już zaatakował) -> Pokazujemy napisy o akumulatorze i świecy
+        string tekstNaprawy = "";
 
         if (!akumulatorZalozony)
-            tekst += Ekwipunek.maAkumulator
-                ? "Naciśnij [F] aby założyć akumulator\n"
-                : "Potrzebny akumulator!\n";
+            tekstNaprawy += Ekwipunek.maAkumulator ? "Naciśnij [F] aby założyć akumulator\n" : "Potrzebny akumulator!\n";
 
         if (!swiecaZalozona)
-            tekst += Ekwipunek.maSwiecaZaplonowa
-                ? "Naciśnij [F] aby założyć świecę zapłonową\n"
-                : "Potrzebna świeca zapłonowa!\n";
+            tekstNaprawy += Ekwipunek.maSwiecaZaplonowa ? "Naciśnij [F] aby założyć świecę zapłonową\n" : "Potrzebna świeca zapłonowa!\n";
 
-        if (!kanisterZalany)
-            tekst = Ekwipunek.maKanister
-                ? "Naciśnij [F] aby wlać paliwo\n"
-                : "Pusty bak\n Może gdzieś znajdę trochę benzyny...";
-
-        // Wysyłamy tekst co klatkę z bardzo krótkim czasem wyświetlania (0.5 sekundy),
-        // dzięki czemu podpowiedź zniknie od razu po odejściu od auta
-        hintManager.ShowHint(tekst.TrimEnd(), 0.5f);
+        hintManager.ShowHint(tekstNaprawy.TrimEnd(), 0.5f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -167,13 +176,7 @@ public class CarRequirements : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = true;
-
-            // Zapisujemy skrypt ruchu gracza, który wszedł w trigger
             playerMovementScript = other.GetComponent<MonoBehaviour>();
-
-            // UWAGA: Jeśli Twój skrypt ruchu to np. FirstPersonController i ukrywa się głębiej, 
-            // w razie problemów podmień linijkę wyżej na:
-            // playerMovementScript = other.GetComponent("FirstPersonController") as MonoBehaviour;
         }
     }
 
@@ -182,10 +185,7 @@ public class CarRequirements : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             if (wAucie) return;
-
             isPlayerNear = false;
-            
-            // Po odejściu od auta natychmiast gasimy panel HintManagera
             if (hintManager != null && hintManager.hintPanel != null)
                 hintManager.hintPanel.SetActive(false);
         }
