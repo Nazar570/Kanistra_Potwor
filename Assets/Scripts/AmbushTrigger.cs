@@ -49,7 +49,6 @@ public class AmbushTrigger : MonoBehaviour
     {
         Debug.Log("Gracz zaatakowany w budynku! Nastêpuje uderzenie.");
 
-        // NOWOŒÆ: Wy³¹czamy œcie¿kê naprowadzaj¹c¹, poniewa¿ gracz ju¿ dotar³ do budynku
         AmbushPath path = Object.FindFirstObjectByType<AmbushPath>();
         if (path != null)
         {
@@ -62,6 +61,7 @@ public class AmbushTrigger : MonoBehaviour
         CharacterController cc = player.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
 
+        // 1. Ekran robi siê czarny
         float timer = 0f;
         while (timer < fadeDuration)
         {
@@ -77,11 +77,19 @@ public class AmbushTrigger : MonoBehaviour
 
         yield return new WaitForSeconds(2.0f);
 
+        // 2. Teleportacja na ³ó¿ko w Asylum
         if (punktSpawnuWAsylum != null)
         {
             player.transform.position = punktSpawnuWAsylum.position;
             player.transform.rotation = punktSpawnuWAsylum.rotation;
             Debug.Log("Gracz przeteleportowany do wnêtrza Asylum!");
+
+            // W³¹czamy skrypt wstawania - on sam zajmie siê zablokowaniem ruchu i obrotem kamery w sufit
+            BedStartSystem bedSystem = player.GetComponent<BedStartSystem>();
+            if (bedSystem != null)
+            {
+                bedSystem.enabled = true;
+            }
         }
         else
         {
@@ -90,6 +98,7 @@ public class AmbushTrigger : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
+        // 3. Ekran zaczyna siê rozjaœniaæ
         timer = fadeDuration;
         while (timer > 0f)
         {
@@ -104,6 +113,5 @@ public class AmbushTrigger : MonoBehaviour
         }
 
         if (cc != null) cc.enabled = true;
-        if (fpsController != null) fpsController.enabled = true;
     }
 }
