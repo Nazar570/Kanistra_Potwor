@@ -228,7 +228,7 @@ Transform:
   m_GameObject: {fileID: 144595132}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
-  m_LocalPosition: {x: 127.7, y: 3, z: 99.8}
+  m_LocalPosition: {x: 127.7, y: 3, z: 165.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -458,6 +458,8 @@ GameObject:
   - component: {fileID: 287537067}
   - component: {fileID: 287537069}
   - component: {fileID: 287537068}
+  - component: {fileID: 287537070}
+  - component: {fileID: 287537071}
   m_Layer: 5
   m_Name: HintPanel
   m_TagString: Untagged
@@ -523,6 +525,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 287537066}
   m_CullTransparentMesh: 1
+--- !u!114 &287537070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 287537066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 10
+    m_Right: 10
+    m_Top: 10
+    m_Bottom: 10
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &287537071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 287537066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &314227692
 GameObject:
   m_ObjectHideFlags: 0
@@ -810,7 +852,7 @@ Transform:
   m_GameObject: {fileID: 871505982}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 38, y: -12.2, z: 139.1}
+  m_LocalPosition: {x: 46, y: -12.2, z: 139.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1034,7 +1076,7 @@ MonoBehaviour:
   distanceToEnter: 5
   faderImage: {fileID: 1060782496}
   hintMessage: "Chyba ten samoch\xF3d to moja jedyna opcja, \u017Ceby gdzie\u015B
-    si\u0119 dosta\u0107..."
+    si\u0119 dosta\u0107...\\nNaci\u015Bnij [E] aby wsi\u0105\u015B\u0107"
   hintDuration: 3
   zablokowanyNaTejScenie: 0
 --- !u!54 &921569704
@@ -1977,7 +2019,7 @@ Transform:
   m_GameObject: {fileID: 1762457637}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 75.8, y: -8, z: 413.9}
+  m_LocalPosition: {x: 75.8, y: -8, z: 279.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2353,7 +2395,7 @@ Transform:
   m_GameObject: {fileID: 2110327202}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 180.8, y: -0.3, z: 267.7}
+  m_LocalPosition: {x: 202, y: -0.3, z: 267.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

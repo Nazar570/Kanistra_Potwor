@@ -31,7 +31,7 @@ public class Dragandthrow : MonoBehaviour
   
         if (playerTransform == null || isShoot) return;
 
-        
+        if (Time.timeScale == 0f) return;
         float distance = Vector3.Distance(transform.position, playerTransform.position);
 
       

@@ -9,7 +9,10 @@ public class CursorLocker : MonoBehaviour
 
     void OnApplicationFocus(bool hasFocus)
     {
-        // To naprawia problem, gdy klikasz poza okno gry i wracasz
+        // Jeśli czas gry stoi (śmierć / pauza), ignorujemy powrót do okna gry i NIE blokujemy myszki
+        if (Time.timeScale == 0f) return;
+
+        // To naprawia problem, gdy klikasz poza okno gry i wracasz podczas rozgrywki
         if (hasFocus) 
         {
             LockIt();

@@ -14,6 +14,10 @@ public class CarRequirements : MonoBehaviour
     public AmbushTrigger ambushTriggerScript;
     public AmbushPath ambushPathScript;
 
+    [Header("NOWOŚĆ: Obiekt Krzyku")]
+    [Tooltip("Przeciągnij tutaj obiekt sciezkakrzyk z Hierarchy")]
+    public GameObject sciezkaKrzyk; // DODANE: Referencja do obiektu, który ma się włączyć
+
     private bool isPlayerNear = false;
     private bool akumulatorZalozony = false;
     private bool swiecaZalozona = false;
@@ -31,6 +35,12 @@ public class CarRequirements : MonoBehaviour
         if (carDriving != null) carDriving.enabled = false;
         if (carInteraction != null) carInteraction.enabled = false;
         hintManager = Object.FindFirstObjectByType<HintManager>();
+
+        // DODANE: Dla pewności upewniamy się, że na starcie gry obiekt jest wyłączony
+        if (sciezkaKrzyk != null)
+        {
+            sciezkaKrzyk.SetActive(false);
+        }
     }
 
     void Update()
@@ -73,6 +83,8 @@ public class CarRequirements : MonoBehaviour
                 odbiornik.model3DBaterii.SetActive(false);
             Debug.Log("Akumulator zamontowany!");
             cosZmieniono = true;
+
+            SprawdzWarunekKrzyku(); // DODANE: Sprawdzamy, czy mamy już komplet (świeca + aku)
         }
 
         if (!swiecaZalozona && Ekwipunek.maSwiecaZaplonowa)
@@ -84,6 +96,8 @@ public class CarRequirements : MonoBehaviour
                 odbiornik.model3DSwieca.SetActive(false);
             Debug.Log("Świeca zapłonowa zamontowana!");
             cosZmieniono = true;
+
+            SprawdzWarunekKrzyku(); // DODANE: Sprawdzamy, czy mamy już komplet (świeca + aku)
         }
 
         if (!kanisterZalany && Ekwipunek.maKanister)
@@ -118,6 +132,19 @@ public class CarRequirements : MonoBehaviour
             if (ambushPathScript != null)
             {
                 ambushPathScript.ActivatePath();
+            }
+        }
+    }
+
+    // DODANE: Nowa, czysta metoda sprawdzająca obecność świecy i akumulatora
+    private void SprawdzWarunekKrzyku()
+    {
+        if (akumulatorZalozony && swiecaZalozona)
+        {
+            if (sciezkaKrzyk != null)
+            {
+                sciezkaKrzyk.SetActive(true);
+                Debug.Log("Świeca i Akumulator są na miejscu! Obiekt sciezkakrzyk został WŁĄCZONY.");
             }
         }
     }
