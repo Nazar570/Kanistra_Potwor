@@ -9,18 +9,18 @@ public class BoundaryTrigger : MonoBehaviour
 
     void Start()
     {
-        // Szukamy managera na scenie
         hintManager = FindFirstObjectByType<HintManager>();
     }
 
     private void OnTriggerEnter(Collider other)
-{
-    Debug.Log("Czegoś dotknąłem: " + other.name); // To wypisze w konsoli nazwę wszystkiego, co wejdzie w ścianę
-    
-    if (other.CompareTag("Player"))
     {
-        Debug.Log("To gracz! Wysyłam wiadomość...");
-        hintManager.ShowHint(messageToShow, displayTime);
+        Debug.Log("Czegoś dotknąłem: " + other.name); 
+        
+        if (other.CompareTag("Player") && hintManager != null)
+        {
+            Debug.Log("To gracz! Wysyłam wiadomość...");
+            // Wymuszenie czarnego koloru tekstu dla niewidzialnych ścian mapy
+            hintManager.ShowHint($"<color=black>{messageToShow}</color>", displayTime);
+        }
     }
-}
 }

@@ -1,11 +1,8 @@
 using UnityEngine;
-using TMPro;
 
 public class PodniesPrzedmiot : MonoBehaviour
 {
-    [Header("UI - Stary tekst (można zostawić pusty)")]
-    public TextMeshProUGUI interactionText;
-    
+    [Header("Ustawienia przedmiotu")]
     [Tooltip("Zaznacz dla Łomu. Odznacz dla Klucza.")]
     public bool czyToLom = true; 
     public string nazwaPrzedmiotu = "Łom";
@@ -17,19 +14,16 @@ public class PodniesPrzedmiot : MonoBehaviour
     {
         // Szukamy HintManagera na scenie automatycznie
         hintManager = Object.FindFirstObjectByType<HintManager>();
-
-        if (interactionText != null) 
-            interactionText.gameObject.SetActive(false);
     }
 
     void Update()
     {
         if (!isPlayerNear) return;
 
-        // Wyświetlanie hinta co klatkę (zniknie automatycznie po odejściu)
+        // Wyświetlanie hinta co klatkę z wymuszonym czarnym kolorem (zniknie automatycznie po odejściu)
         if (hintManager != null)
         {
-            hintManager.ShowHint($"Naciśnij [F], aby podnieść {nazwaPrzedmiotu}", 0.5f);
+            hintManager.ShowHint($"<color=black>Naciśnij [F], aby podnieść {nazwaPrzedmiotu}</color>", 0.5f);
         }
 
         if (Input.GetKeyDown(KeyCode.F))
@@ -37,10 +31,6 @@ public class PodniesPrzedmiot : MonoBehaviour
             // Dodaje przedmiot do pamięci (włącza obrazek w rogu)
             if (czyToLom) Ekwipunek.maLom = true;
             else Ekwipunek.maKlucz = true;
-
-            // Sprząta stary tekst UI, jeśli istniał
-            if (interactionText != null) 
-                interactionText.gameObject.SetActive(false);
             
             // Gasimy natychmiast panel HintManagera, żeby napis nie wisiał po zniszczeniu obiektu
             if (hintManager != null && hintManager.hintPanel != null)
@@ -65,7 +55,7 @@ public class PodniesPrzedmiot : MonoBehaviour
         {
             isPlayerNear = false;
             
-            // Czyszczenie hinta od razu przy wyjściu z triggera
+            // Gasimy natychmiast po wyjściu z triggera przedmiotu
             if (hintManager != null && hintManager.hintPanel != null)
                 hintManager.hintPanel.SetActive(false);
         }

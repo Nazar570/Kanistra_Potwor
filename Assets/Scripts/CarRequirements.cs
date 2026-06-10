@@ -14,10 +14,14 @@ public class CarRequirements : MonoBehaviour
     public AmbushTrigger ambushTriggerScript;
     public AmbushPath ambushPathScript;
 
-    [Header("NOWOŚĆ: Obiekt Krzyku")]
-    [Tooltip("Przeciągnij tutaj obiekt sciezkakrzyk z Hierarchy")]
-    public GameObject sciezkaKrzyk; // DODANE: Referencja do obiektu, który ma się włączyć
 
+    [Header("NOWOŚĆ: Obiekt Krzyku")]
+[Tooltip("Przeciągnij tutaj obiekt sciezkakrzyk z Hierarchy")]
+public GameObject sciezkaKrzyk;
+
+// --- DOPISZ TO POLE ---
+[Tooltip("Przeciągnij tutaj bezpośrednio obiekt MUTANTA ze środka ścieżki")]
+public GameObject mutantBezposredni;
     private bool isPlayerNear = false;
     private bool akumulatorZalozony = false;
     private bool swiecaZalozona = false;
@@ -31,17 +35,16 @@ public class CarRequirements : MonoBehaviour
     private MonoBehaviour playerMovementScript;
 
     void Start()
-    {
-        if (carDriving != null) carDriving.enabled = false;
-        if (carInteraction != null) carInteraction.enabled = false;
-        hintManager = Object.FindFirstObjectByType<HintManager>();
+{
+    if (carDriving != null) carDriving.enabled = false;
+    if (carInteraction != null) carInteraction.enabled = false;
+    hintManager = Object.FindFirstObjectByType<HintManager>();
 
-        // DODANE: Dla pewności upewniamy się, że na starcie gry obiekt jest wyłączony
-        if (sciezkaKrzyk != null)
-        {
-            sciezkaKrzyk.SetActive(false);
-        }
-    }
+    if (sciezkaKrzyk != null) sciezkaKrzyk.SetActive(false);
+    
+    // --- DOPISZ TO ---
+    if (mutantBezposredni != null) mutantBezposredni.SetActive(false); 
+}
 
     void Update()
     {
@@ -138,16 +141,22 @@ public class CarRequirements : MonoBehaviour
 
     // DODANE: Nowa, czysta metoda sprawdzająca obecność świecy i akumulatora
     private void SprawdzWarunekKrzyku()
+{
+    if (akumulatorZalozony && swiecaZalozona)
     {
-        if (akumulatorZalozony && swiecaZalozona)
+        if (sciezkaKrzyk != null)
         {
-            if (sciezkaKrzyk != null)
-            {
-                sciezkaKrzyk.SetActive(true);
-                Debug.Log("Świeca i Akumulator są na miejscu! Obiekt sciezkakrzyk został WŁĄCZONY.");
-            }
+            sciezkaKrzyk.SetActive(true);
+        }
+
+        // --- DOPISZ TO: Wymuszamy włączenie mutanta prosto z kodu bazy ---
+        if (mutantBezposredni != null)
+        {
+            mutantBezposredni.SetActive(true);
+            Debug.Log("KOD: Wymusiłem włączenie mutanta bezposrednio!");
         }
     }
+}
 
     void UruchomWsiadanie()
     {
@@ -174,7 +183,7 @@ public class CarRequirements : MonoBehaviour
         // ETAP 3: Wszystko jest naprawione -> Aktywujemy wołanie z budynku!
         if (akumulatorZalozony && swiecaZalozona && kanisterZalany)
         {
-            hintManager.ShowHint("Auto gotowe!\n...Czekaj, słyszę krzyk z budynku obok! Muszę to sprawdzić!", 0.5f);
+            hintManager.ShowHint("Co to? Jakiś krzyk!\nMuszę to sprawdzić!", 0.5f);
             return;
         }
 

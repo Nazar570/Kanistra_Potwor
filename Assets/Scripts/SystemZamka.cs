@@ -1,10 +1,7 @@
 using UnityEngine;
-using TMPro;
 
 public class SystemZamka : MonoBehaviour
 {
-    public TextMeshProUGUI interactionText;
-    
     [Header("Co jest potrzebne?")]
     [Tooltip("Zaznacz = Łom. Odznacz = Klucz.")]
     public bool wymagaLomu = true; 
@@ -21,27 +18,40 @@ public class SystemZamka : MonoBehaviour
     public GameObject modelKlodki;
 
     private bool isPlayerNear = false;
+    private HintManager hintManager;
 
     void Start()
     {
+        // Szukamy centralnego managera podpowiedzi
+        hintManager = Object.FindFirstObjectByType<HintManager>();
+
         // Uśpienie zwykłych drzwi (przestają działać na "E")
         if (skryptDrzwi != null) skryptDrzwi.enabled = false;
     }
 
     void Update()
     {
+        if (!isPlayerNear) return;
+
         // Sprawdza globalną pamięć, czy masz odpowiedni obrazek w ekwipunku
         bool maOdpowiedniPrzedmiot = wymagaLomu ? Ekwipunek.maLom : Ekwipunek.maKlucz;
 
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.F) && maOdpowiedniPrzedmiot)
+        // Wyświetlanie hinta co klatkę (kolor czarny)
+        if (hintManager != null)
         {
-            OtworzZamek();
+            string wiadomosc = maOdpowiedniPrzedmiot ? tekstGdyMasz : tekstGdyNieMasz;
+            hintManager.ShowHint($"<color=black>{wiadomosc}</color>", 0.5f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F) && maOdpowiedniPrzedmiot)
+        {
+            OdblokujZamki();
         }
     }
 
-    void OtworzZamek()
+    private void OdblokujZamki()
     {
-        // "Zjada" przedmiot z ekwipunku (obrazek w rogu zniknie sam)
+        // Zużywa przedmiot z ekwipunku
         if (wymagaLomu) Ekwipunek.maLom = false;
         else Ekwipunek.maKlucz = false;
 
@@ -55,8 +65,10 @@ public class SystemZamka : MonoBehaviour
         // Fizycznie niszczy model kłódki 3D, żeby odpadł z drzwi
         if (modelKlodki != null) Destroy(modelKlodki);
 
-        // Wyłącz tekst bezpiecznie i zniszcz ten skrypt
-        if (interactionText != null) interactionText.gameObject.SetActive(false);
+        // Wyłącz panel hinta natychmiast, żeby nie wisiał po usunięciu skryptu
+        if (hintManager != null && hintManager.hintPanel != null)
+            hintManager.hintPanel.SetActive(false);
+
         Destroy(this); 
     }
 
@@ -65,10 +77,6 @@ public class SystemZamka : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = true;
-            AktualizujTekst();
-            
-            // Włączamy tekst (zabezpieczone)
-            if (interactionText != null) interactionText.gameObject.SetActive(true);
         }
     }
 
@@ -78,16 +86,9 @@ public class SystemZamka : MonoBehaviour
         {
             isPlayerNear = false;
             
-            // Wyłączamy tekst (zabezpieczone)
-            if (interactionText != null) interactionText.gameObject.SetActive(false);
+            // Gasimy panel po odejściu od drzwi z kłódką
+            if (hintManager != null && hintManager.hintPanel != null)
+                hintManager.hintPanel.SetActive(false);
         }
-    }
-
-    private void AktualizujTekst()
-    {
-        if (interactionText == null) return; // Jeśli nie ma przypisanego tekstu, nie rób nic
-        
-        bool maOdpowiedniPrzedmiot = wymagaLomu ? Ekwipunek.maLom : Ekwipunek.maKlucz;
-        interactionText.text = maOdpowiedniPrzedmiot ? tekstGdyMasz : tekstGdyNieMasz;
     }
 }

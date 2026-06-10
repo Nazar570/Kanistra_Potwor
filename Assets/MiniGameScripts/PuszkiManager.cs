@@ -1,12 +1,8 @@
 using UnityEngine;
-using TMPro;
 using System.Collections.Generic;
 
 public class PuszkiManager : MonoBehaviour
 {
-    [Header("UI")]
-    public TextMeshProUGUI tekstKomunikatowUI;
-
     [Header("Nagroda")]
     public GameObject prefabNagrody;
     public Transform miejsceSpawnuNagrody;
@@ -16,7 +12,7 @@ public class PuszkiManager : MonoBehaviour
     public Transform canHolder;
     public float dystansSpadku = 0.8f;
 
-    [Header("Dźwięki (NOWOŚĆ)")]
+    [Header("Dźwięki")]
     public AudioSource glosnik;         
     public AudioClip dzwiekWygranej;    
     public AudioClip dzwiekResetu;      
@@ -27,6 +23,9 @@ public class PuszkiManager : MonoBehaviour
     private bool graSkonczona = false;
     private bool czyMoznaResetowac = false;
     private bool fizykaOdrzucona = false;
+
+    private HintManager hintManager;
+    private string obecnyKomunikat = "";
 
     private struct SzablonObiektu
     {
@@ -43,13 +42,10 @@ public class PuszkiManager : MonoBehaviour
 
     void OnEnable()
     {
-        if (tekstKomunikatowUI != null)
-            tekstKomunikatowUI.gameObject.SetActive(false);
+        hintManager = Object.FindFirstObjectByType<HintManager>();
 
-       
         if (glosnik == null) glosnik = GetComponent<AudioSource>();
 
-      
         Canned[] znalezionePuszki = FindObjectsByType<Canned>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (Canned puszka in znalezionePuszki)
         {
@@ -71,7 +67,6 @@ public class PuszkiManager : MonoBehaviour
             if (rb != null) rb.isKinematic = true;
         }
 
-        
         Rigidbody[] wszystkieRb = FindObjectsByType<Rigidbody>(FindObjectsSortMode.None);
         foreach (Rigidbody rb in wszystkieRb)
         {
@@ -111,12 +106,12 @@ public class PuszkiManager : MonoBehaviour
             return;
         }
 
-        if (graSkonczona) return;
-
-        if (isInThrowZone && fizykaOdrzucona && !czyMoznaResetowac)
+        if (isInThrowZone && fizykaOdrzucona && !czyMoznaResetowac && !graSkonczona)
         {
             OdswiezLicznikPuszek();
         }
+        
+        // USUNIĘTO STĄD WYWOŁYWANIE hintManager.ShowHint() CO KLATKĘ!
     }
 
     void OdmrozFizykePuszek()
@@ -134,33 +129,31 @@ public class PuszkiManager : MonoBehaviour
 
     public void UstawThrowZone(bool wStrefie)
     {
-        if (graSkonczona) return;
         isInThrowZone = wStrefie;
         
-        if (tekstKomunikatowUI != null)
+        if (wStrefie)
         {
-            tekstKomunikatowUI.gameObject.SetActive(wStrefie);
-            
-            if (wStrefie)
+            if (!fizykaOdrzucona && !graSkonczona)
             {
-                if (!fizykaOdrzucona)
-                {
-                    WyswietlTekstStartowy();
-                }
-                else
-                {
-                    OdswiezLicznikPuszek();
-                }
+                WyswietlTekstStartowy();
             }
+            else if (!graSkonczona)
+            {
+                OdswiezLicznikPuszek();
+            }
+        }
+        else
+        {
+            UkryjPanelHinta();
         }
     }
 
     void WyswietlTekstStartowy()
     {
-        if (tekstKomunikatowUI != null)
-        {
-            tekstKomunikatowUI.text = $"Musisz strącić wszystkie puszki!\n<color=yellow>Puszki na stole: {zapasowePuszki.Count} | Pozostałe kule: {zapasoweKule.Count}</color>";
-        }
+        obecnyKomunikat = $"Musisz strącić wszystkie puszki!\n<color=yellow>Puszki na stole: {zapasowePuszki.Count} | Pozostałe kule: {zapasoweKule.Count}</color>";
+        
+        // NOWOŚĆ: Wywołujemy hinta raz, z długim czasem (np. 999 sekund), bo zniknie sam jak gracz wyjdzie ze strefy
+        AplikujKomunikatUI();
     }
 
     void OdswiezLicznikPuszek()
@@ -203,14 +196,18 @@ public class PuszkiManager : MonoBehaviour
             return;
         }
 
-        if (tekstKomunikatowUI != null && isInThrowZone)
+        string nowyKomunikat = $"Musisz strącić wszystkie puszki!\n<color=yellow>Puszki na stole: {puszekNaStoliku} | Pozostałe kule: {pozostaloKul}</color>";
+        
+        // NOWOŚĆ: Aktualizujemy UI tylko, jeśli dane liczbowe faktycznie się zmieniły!
+        if (nowyKomunikat != obecnyKomunikat)
         {
-            tekstKomunikatowUI.text = $"Musisz strącić wszystkie puszki!\n<color=yellow>Puszki na stole: {puszekNaStoliku} | Pozostałe kule: {pozostaloKul}</color>";
+            obecnyKomunikat = nowyKomunikat;
+            AplikujKomunikatUI();
+        }
 
-            if (pozostaloKul == 0 && puszekNaStoliku > 0)
-            {
-                Invoke("SprawdzKoniecRundki", 3.0f);
-            }
+        if (pozostaloKul == 0 && puszekNaStoliku > 0)
+        {
+            Invoke("SprawdzKoniecRundki", 3.0f);
         }
     }
 
@@ -233,13 +230,9 @@ public class PuszkiManager : MonoBehaviour
         if (puszekNaStoliku > 0)
         {
             czyMoznaResetowac = true;
-            if (tekstKomunikatowUI != null && isInThrowZone)
-            {
-                tekstKomunikatowUI.text = "<color=red>Brak kul! Nie udało się strącić puszek.\nNaciśnij <color=white>[ R ]</color>, aby spróbować ponownie.</color>";
-                
-               
-                OtworzDzwiek(dzwiekPrzegranej);
-            }
+            obecnyKomunikat = "<color=red>Brak kul! Nie udało się strącić puszek.\nNaciśnij <color=white>[ R ]</color>, aby spróbować ponownie.</color>";
+            AplikujKomunikatUI();
+            OtworzDzwiek(dzwiekPrzegranej);
         }
     }
 
@@ -248,13 +241,8 @@ public class PuszkiManager : MonoBehaviour
         czyMoznaResetowac = false;
         CancelInvoke("SprawdzKoniecRundki");
 
-        if (tekstKomunikatowUI != null && isInThrowZone)
-        {
-            tekstKomunikatowUI.gameObject.SetActive(true);
-            tekstKomunikatowUI.text = "<color=green>Brawo! Strąciłeś wszystkie puszki!\nPodejdź do nagrody i naciśnij <color=white>[ E ]</color>, aby ją odebrać.</color>";
-        }
-
-     
+        obecnyKomunikat = "<color=green>Brawo! Strąciłeś wszystkie puszki!\nPodejdź do nagrody i naciśnij <color=white>[ E ]</color>, aby ją odebrać.</color>";
+        AplikujKomunikatUI();
         OtworzDzwiek(dzwiekWygranej);
 
         if (prefabNagrody != null && miejsceSpawnuNagrody != null)
@@ -272,7 +260,6 @@ public class PuszkiManager : MonoBehaviour
         fizykaOdrzucona = false;
         czyMoznaResetowac = false; 
 
-       
         OtworzDzwiek(dzwiekResetu);
 
         foreach (GameObject puszka in aktywnePuszki) { if (puszka != null) Destroy(puszka); }
@@ -306,23 +293,18 @@ public class PuszkiManager : MonoBehaviour
             }
         }
 
-        if (tekstKomunikatowUI != null)
+        if (isInThrowZone)
         {
-            if (isInThrowZone)
-            {
-                tekstKomunikatowUI.gameObject.SetActive(true); 
-                WyswietlTekstStartowy();
-            }
-            else
-            {
-                tekstKomunikatowUI.gameObject.SetActive(false);
-            }
+            WyswietlTekstStartowy();
+        }
+        else
+        {
+            UkryjPanelHinta();
         }
 
         Debug.Log("[MINIGRA] Reset udany. Odliczanie anulowane, tekst startowy włączony.");
     }
 
-  
     void OtworzDzwiek(AudioClip clip)
     {
         if (glosnik != null && clip != null)
@@ -331,13 +313,27 @@ public class PuszkiManager : MonoBehaviour
         }
     }
 
+    // NOWA FUNKCJA: Bezpiecznie wysyła aktualny tekst do interfejsu
+    private void AplikujKomunikatUI()
+    {
+        if (hintManager != null && isInThrowZone && !string.IsNullOrEmpty(obecnyKomunikat))
+        {
+            // Ponieważ gracz stoi w strefie, dajemy duży czas trwania (np. 10 minut), 
+            // a gdy wyjdzie ze strefy, panel i tak zamknie funkcja UkryjPanelHinta().
+            hintManager.ShowHint(obecnyKomunikat, 600f); 
+        }
+    }
+
+    private void UkryjPanelHinta()
+    {
+        if (hintManager != null && hintManager.hintPanel != null)
+            hintManager.hintPanel.SetActive(false);
+    }
+
     public void CzyscTekst()
     {
         CancelInvoke("SprawdzKoniecRundki");
-        if (tekstKomunikatowUI != null)
-        {
-            tekstKomunikatowUI.text = "";
-            tekstKomunikatowUI.gameObject.SetActive(false);
-        }
+        obecnyKomunikat = "";
+        UkryjPanelHinta();
     }
 }

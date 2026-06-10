@@ -4,9 +4,6 @@ using UnityEngine.UI;
 
 public class AmbushTrigger : MonoBehaviour
 {
-    [Header("Konfiguracja NPC")]
-    [SerializeField] private GameObject npcObject;
-
     [Header("UI i Efekty")]
     [SerializeField] private Image fadeImage;
     [SerializeField] private float fadeDuration = 1.0f;
@@ -14,32 +11,55 @@ public class AmbushTrigger : MonoBehaviour
     [Header("Cel Teleportacji")]
     [SerializeField] private Transform punktSpawnuWAsylum;
 
+    [Header("Dźwięk i Model Mutanta (3D)")]
+    [Tooltip("Przeciągnij tutaj bezpośrednio obiekt Mutanta z głośnikiem")]
+    [SerializeField] private AudioSource mutantAudioSource;
+
     private bool isCarRepaired = false;
     private bool isTriggered = false;
 
     private void Start()
     {
-        if (npcObject != null) npcObject.SetActive(false);
-
+        // Zerujemy czarny ekran na starcie gry
         if (fadeImage != null)
         {
             Color c = fadeImage.color;
             c.a = 0f;
             fadeImage.color = c;
         }
+
+        // UWAGA: Nie wyłączamy i nie uciszamy tu mutanta bezpośrednio. 
+        // Obiekt sciezkaKrzyk jest domyślnie wyłączony przez samochód na starcie, więc mutant i tak śpi.
     }
 
     public void ActivateAmbushSequence()
     {
         isCarRepaired = true;
-        if (npcObject != null) npcObject.SetActive(true);
         Debug.Log("Samochód naprawiony! Kapsuła w budynku aktywowana.");
+
+        // Jeśli przypisaliśmy głośnik mutanta
+        if (mutantAudioSource != null)
+        {
+            // Włączamy fizycznie cały obiekt mutanta za pomocą jego komponentu AudioSource
+            mutantAudioSource.gameObject.SetActive(true);
+            Debug.Log($"[AMBUSH] Włączono obiekt mutanta: {mutantAudioSource.gameObject.name}");
+
+            // Wymuszamy odtworzenie dźwięku krzyk
+            if (!mutantAudioSource.isPlaying)
+            {
+                Debug.Log("[AMBUSH] Odpalam odtwarzanie dźwięku krzyku.");
+                mutantAudioSource.Play();
+
+                if (mutantAudioSource.clip == null)
+                {
+                    Debug.LogError("UWAGA: AudioSource nie ma przypisanego fizycznego klipu audio w polu Audio Generator!");
+                }
+            }
+        }
     }
 
-    // NOWOŚĆ: Funkcja wywoływana przez przycisk RESTART w PlayerDeath
     public void TriggerKnockoutFromDeath(GameObject player)
     {
-        // Wymuszamy uruchomienie sekwencji bez względu na to, czy auto było naprawione
         isTriggered = true; 
         StartCoroutine(KnockoutSequenceRoutine(player));
     }
@@ -57,13 +77,19 @@ public class AmbushTrigger : MonoBehaviour
     {
         Debug.Log("Uruchamianie sekwencji przeniesienia gracza...");
 
+        // Gracz zemdlał, więc uciszamy potwora na dobre
+        if (mutantAudioSource != null)
+        {
+            mutantAudioSource.Stop(); 
+            mutantAudioSource.gameObject.SetActive(false); // Opcjonalnie: chowamy go, gdy gracz mdleje
+        }
+
         AmbushPath path = Object.FindFirstObjectByType<AmbushPath>();
         if (path != null)
         {
             path.DeactivatePath();
         }
 
-        // Upewniamy się, że sterowanie jest wyłączone
         MonoBehaviour fpsController = player.GetComponent("FirstPersonController") as MonoBehaviour;
         if (fpsController != null) fpsController.enabled = false;
 
@@ -96,7 +122,6 @@ public class AmbushTrigger : MonoBehaviour
             player.transform.rotation = punktSpawnuWAsylum.rotation;
             Debug.Log("Gracz przeteleportowany do wnętrza Asylum!");
 
-            // Włączamy skrypt wstawania
             BedStartSystem bedSystem = player.GetComponent<BedStartSystem>();
             if (bedSystem != null)
             {
@@ -110,7 +135,6 @@ public class AmbushTrigger : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        // NOWOŚĆ: Po udanej teleportacji "uzdrawiamy" wewnętrzny stan skryptu śmierci gracza
         PlayerDeath pd = player.GetComponent<PlayerDeath>();
         if (pd != null)
         {
@@ -133,7 +157,6 @@ public class AmbushTrigger : MonoBehaviour
 
         if (cc != null) cc.enabled = true;
         
-        // Resetujemy flagę, aby system mógł zadziałać ponownie, jeśli zajdzie potrzeba
         isTriggered = false; 
     }
 }

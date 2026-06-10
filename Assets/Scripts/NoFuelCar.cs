@@ -8,19 +8,21 @@ public class NoFuelCar : MonoBehaviour
 
     void Start()
     {
-        // Wyświetla komunikat zaraz po załadowaniu sceny
+        // Jeśli nie przypisano w Inspektorze, szukamy automatycznie
+        if (hintManager == null) hintManager = Object.FindFirstObjectByType<HintManager>();
+
+        // Wyświetla komunikat zaraz po załadowaniu sceny (kolor czarny)
         if (hintManager != null)
         {
-            hintManager.ShowHint(carMessage, displayDuration);
+            hintManager.ShowHint($"<color=black>{carMessage}</color>", displayDuration);
         }
     }
 
-    // Wywołuje się, gdy klikniesz na samochód (wymaga Collidera na aucie!)
     void OnTriggerEnter(Collider other)
-{
-    if (other.CompareTag("Player")) // Sprawdza, czy to gracz podszedł
     {
-        hintManager.ShowHint(carMessage, displayDuration);
+        if (other.CompareTag("Player") && hintManager != null) // Sprawdza, czy to gracz podszedł
+        {
+            hintManager.ShowHint($"<color=black>{carMessage}</color>", displayDuration);
+        }
     }
-}
 }

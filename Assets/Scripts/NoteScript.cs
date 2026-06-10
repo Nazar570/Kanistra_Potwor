@@ -1,31 +1,40 @@
 using UnityEngine;
-using TMPro;
 
 public class NoteScript : MonoBehaviour
 {
     [Header("UI Elementy")]
-    public TextMeshProUGUI interactionText; 
     public GameObject notePanel;            
 
     private bool isPlayerNear = false;
     private bool isReading = false;
+    private HintManager hintManager;
 
     void Start()
     {
+        hintManager = Object.FindFirstObjectByType<HintManager>();
         if (notePanel != null) notePanel.SetActive(false);
     }
 
     void Update()
     {
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.E))
+        if (isPlayerNear)
         {
-            if (!isReading)
+            // Wyświetl podpowiedź interakcji na jasnym panelu (tylko jeśli gracz nie czyta aktualnie)
+            if (!isReading && hintManager != null)
             {
-                OpenNote();
+                hintManager.ShowHint("<color=black>Naciśnij [E] aby przeczytać</color>", 0.5f);
             }
-            else
+
+            if (Input.GetKeyDown(KeyCode.E))
             {
-                CloseNote();
+                if (!isReading)
+                {
+                    OpenNote();
+                }
+                else
+                {
+                    CloseNote();
+                }
             }
         }
     }
@@ -35,27 +44,15 @@ public class NoteScript : MonoBehaviour
         isReading = true;
         notePanel.SetActive(true);
         
-        // WYŁĄCZAMY żółty napis całkowicie na czas czytania
-        if (interactionText != null) 
-            interactionText.gameObject.SetActive(false);
-            
-        // Jeśli chcesz, żeby gracz nie mógł chodzić podczas czytania, odkomentuj to:
-        // Time.timeScale = 0f; 
+        // Wyłączamy panel hinta całkowicie na czas czytania samej kartki
+        if (hintManager != null && hintManager.hintPanel != null) 
+            hintManager.hintPanel.SetActive(false);
     }
 
     public void CloseNote()
     {
         isReading = false;
         notePanel.SetActive(false);
-        
-        // WŁĄCZAMY napis z powrotem, bo gracz nadal jest blisko kartki
-        if (interactionText != null)
-        {
-            interactionText.text = "Naciśnij [E] aby przeczytać";
-            interactionText.gameObject.SetActive(true);
-        }
-
-        // Time.timeScale = 1f; // Przywrócenie czasu
     }
 
     private void OnTriggerEnter(Collider other)
@@ -63,11 +60,6 @@ public class NoteScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = true;
-            if (interactionText != null)
-            {
-                interactionText.text = "Naciśnij [E] aby przeczytać";
-                interactionText.gameObject.SetActive(true);
-            }
         }
     }
 
@@ -76,9 +68,10 @@ public class NoteScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = false;
-            isReading = false;
-            if (notePanel != null) notePanel.SetActive(false);
-            if (interactionText != null) interactionText.gameObject.SetActive(false);
+            
+            // Gasimy podpowiedź po odejściu od listu/kartki
+            if (hintManager != null && hintManager.hintPanel != null)
+                hintManager.hintPanel.SetActive(false);
         }
     }
 }

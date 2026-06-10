@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 using System.Collections;
 
 public class GasnicaSystem : MonoBehaviour
@@ -8,10 +7,6 @@ public class GasnicaSystem : MonoBehaviour
     public GameObject modelWRekach; // Przeciągnij tu zablokowaną gaśnicę spod kamery
     public ParticleSystem chmuraGazu; // Przeciągnij Particle System
 
-    [Header("UI")]
-    public TextMeshProUGUI tekstZoltyPodpowiedz;
-    public TextMeshProUGUI tekstBialyMysli;
-
     [Header("Ustawienia Strzału")]
     public float zasiegGazu = 6f; // Jak daleko psika
     public float katGazu = 60f; // Szerokość stożka chmury
@@ -19,13 +14,15 @@ public class GasnicaSystem : MonoBehaviour
     private bool maGasnice = false;
     private bool zostalaUzyta = false;
     private Transform kamera;
+    private HintManager hintManager;
 
     void Start()
     {
         kamera = Camera.main.transform;
         if (modelWRekach != null) modelWRekach.SetActive(false);
-        if (tekstZoltyPodpowiedz != null) tekstZoltyPodpowiedz.text = "";
-        if (tekstBialyMysli != null) tekstBialyMysli.text = "";
+        
+        // Automatyczne znalezienie globalnego managera podpowiedzi
+        hintManager = Object.FindFirstObjectByType<HintManager>();
     }
 
     public void PodniesGasnice()
@@ -37,41 +34,30 @@ public class GasnicaSystem : MonoBehaviour
         
         Debug.Log("Metoda PodniesGasnice wywołana! Uruchamiam Coroutine...");
         
-        if (tekstZoltyPodpowiedz == null || tekstBialyMysli == null)
-        {
-            Debug.LogError("Nazar, nie przypiąłeś tekstów w Inspektorze do skryptu GasnicaSystem!");
-            return;
-        }
-
         StartCoroutine(PokazKomunikatyStartowe());
     }
 
     IEnumerator PokazKomunikatyStartowe()
     {
-        Debug.Log("Ustawiam teksty na ekranie...");
-        tekstZoltyPodpowiedz.text = "Żeby użyć naciśnij [G]";
-        tekstBialyMysli.text = "chyba do obrony...";
-        
         float timer = 0;
-        // Pętla trwa 7 sekund (tylko myśli gracza tyle wiszą)
+        // Wyświetlamy pierwszą instrukcję przez pierwsze 5 sekund (ciemny kolor)
         while(timer < 7f && !zostalaUzyta)
         {
             timer += Time.deltaTime;
 
-            // Wyłącz żółty tekst dokładnie po 5 sekundach
-            if (timer >= 5f && tekstZoltyPodpowiedz.text != "")
+            if (hintManager != null && !zostalaUzyta)
             {
-                tekstZoltyPodpowiedz.text = "";
+                if (timer < 5f)
+                {
+                    hintManager.ShowHint("<color=#1A1A1A>Żeby użyć naciśnij [G]</color>", 0.5f);
+                }
+                else
+                {
+                    hintManager.ShowHint("<color=#333333>chyba do obrony...</color>", 0.5f);
+                }
             }
 
             yield return null;
-        }
-
-        if (!zostalaUzyta)
-        {
-            tekstZoltyPodpowiedz.text = "";
-            tekstBialyMysli.text = "";
-            Debug.Log("Czas minął, czyszczę teksty.");
         }
     }
 
@@ -87,10 +73,6 @@ public class GasnicaSystem : MonoBehaviour
     {
         zostalaUzyta = true;
         
-        // Aktualizacja tekstów
-        tekstZoltyPodpowiedz.text = "";
-        tekstBialyMysli.text = "trzeba szybko schować się!";
-        
         // Odpal gaz
         chmuraGazu.Play();
 
@@ -101,6 +83,11 @@ public class GasnicaSystem : MonoBehaviour
         // W trakcie psikania ciągle sprawdzamy, czy mutant wszedł w chmurę
         while (timer < czasPsikania)
         {
+            if (hintManager != null)
+            {
+                hintManager.ShowHint("<color=#1A1A1A>trzeba szybko schować się!</color>", 0.5f);
+            }
+
             Collider[] trafienia = Physics.OverlapSphere(kamera.position, zasiegGazu);
             foreach (var trafienie in trafienia)
             {
@@ -133,11 +120,19 @@ public class GasnicaSystem : MonoBehaviour
         }
 
         chmuraGazu.Stop();
-        modelWRekach.SetActive(false); // Wywalamy pustą gaśnicę
+        if (modelWRekach != null) modelWRekach.SetActive(false); // Wywalamy pustą gaśnicę
         maGasnice = false;
 
-        // Trzymaj komunikat jeszcze przez 7 sekund (razem 10s od strzału)
-        yield return new WaitForSeconds(7f);
-        tekstBialyMysli.text = "";
+        // Podtrzymujemy myśl gracza po strzale jeszcze przez chwilę
+        timer = 0f;
+        while (timer < 7f)
+        {
+            timer += Time.deltaTime;
+            if (hintManager != null)
+            {
+                hintManager.ShowHint("<color=#1A1A1A>trzeba szybko schować się!</color>", 0.5f);
+            }
+            yield return null;
+        }
     }
 }

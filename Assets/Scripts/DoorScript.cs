@@ -1,10 +1,8 @@
 using UnityEngine;
-using TMPro;
 
 public class DoorScript : MonoBehaviour
 {
-    [Header("UI i Teksty")]
-    public TextMeshProUGUI interactionText; 
+    [Header("Teksty Interakcji")]
     public string tekstOtworz = "Naciśnij [E] aby otworzyć";
     public string tekstZamknij = "Naciśnij [E] aby zamknąć";
     public string tekstZablokowane = "Potrzebujesz klucza!";
@@ -27,8 +25,8 @@ public class DoorScript : MonoBehaviour
     private Transform autoZawias;
     private Quaternion defaultRotation;
     private Quaternion openRotation;
+    private HintManager hintManager;
 
-    // ZMIANA TUTAJ: Zamieniamy Start() na Awake()
     void Awake()
     {
         // Budowanie zawiasu w locie
@@ -40,50 +38,47 @@ public class DoorScript : MonoBehaviour
         defaultRotation = autoZawias.localRotation;
         openRotation = Quaternion.Euler(defaultRotation.eulerAngles.x, defaultRotation.eulerAngles.y + openAngle, defaultRotation.eulerAngles.z);
 
-        if (interactionText != null) interactionText.gameObject.SetActive(false);
+        hintManager = Object.FindFirstObjectByType<HintManager>();
         
-        // ZABEZPIECZENIE: Wyłącza czujnik klucza ZANIM SystemZamka uśpi ten skrypt
         if (ukrytyCollider != null) ukrytyCollider.enabled = false;
     }
 
     void Update()
     {
-        // Płynny ruch
+        // Płynny ruch drzwi
         if (isOpen)
             autoZawias.localRotation = Quaternion.Slerp(autoZawias.localRotation, openRotation, Time.deltaTime * smoothSpeed);
         else
             autoZawias.localRotation = Quaternion.Slerp(autoZawias.localRotation, defaultRotation, Time.deltaTime * smoothSpeed);
 
-        if (isPlayerNear)
+        // Zarządzanie wyświetlaniem podpowiedzi w polu widzenia
+        if (isPlayerNear && hintManager != null)
         {
+            string wiadomosc = "";
+            if (!czyMoznaOtworzyc)
+            {
+                wiadomosc = tekstZablokowane;
+            }
+            else
+            {
+                wiadomosc = isOpen ? tekstZamknij : tekstOtworz;
+            }
+
+            // Wymuszenie czarnego koloru tekstu dla jasnego panelu UI
+            hintManager.ShowHint($"<color=black>{wiadomosc}</color>", 0.5f);
+
             if (Input.GetKeyDown(KeyCode.E))
             {
                 if (czyMoznaOtworzyc)
                 {
                     isOpen = !isOpen;
-                    UpdateText(); 
                     
-                    // MAGIA: Aktywuje czujnik klucza TYLKO gdy drzwi są otwarte
                     if (ukrytyCollider != null)
                     {
                         ukrytyCollider.enabled = isOpen;
                     }
                 }
             }
-        }
-    }
-
-    private void UpdateText()
-    {
-        if (interactionText == null) return;
-
-        if (!czyMoznaOtworzyc)
-        {
-            interactionText.text = tekstZablokowane;
-        }
-        else
-        {
-            interactionText.text = isOpen ? tekstZamknij : tekstOtworz;
         }
     }
 
@@ -94,8 +89,6 @@ public class DoorScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = true;
-            UpdateText(); 
-            interactionText.gameObject.SetActive(true);
         }
     }
 
@@ -106,7 +99,12 @@ public class DoorScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNear = false;
-            interactionText.gameObject.SetActive(false);
+            
+            // Czyszczenie podpowiedzi po odejściu od drzwi
+            if (hintManager != null && hintManager.hintPanel != null)
+            {
+                hintManager.hintPanel.SetActive(false);
+            }
         }
     }
 }

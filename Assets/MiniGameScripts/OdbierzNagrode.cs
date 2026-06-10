@@ -15,16 +15,17 @@ public class OdbierzNagrode : MonoBehaviour
 
     private ScoreManager scoreManager;
     private PuszkiManager puszkiManager;
+    private HintManager hintManager;
 
     void Start()
     {
-        scoreManager = FindFirstObjectByType<ScoreManager>();
-        puszkiManager = FindFirstObjectByType<PuszkiManager>();
+        scoreManager = Object.FindFirstObjectByType<ScoreManager>();
+        puszkiManager = Object.FindFirstObjectByType<PuszkiManager>();
+        hintManager = Object.FindFirstObjectByType<HintManager>();
 
         if (model3DBaterii != null) model3DBaterii.SetActive(false);
         if (model3DSwieca != null) model3DSwieca.SetActive(false);
     }
-
 
     public void UstawNagrodeNaZiemi(GameObject obj)
     {
@@ -32,7 +33,6 @@ public class OdbierzNagrode : MonoBehaviour
         typNagrody = "bateria";
         odebrano = false;
     }
-
   
     public void UstawSwiece(GameObject obj)
     {
@@ -47,34 +47,42 @@ public class OdbierzNagrode : MonoBehaviour
 
         float dist = Vector3.Distance(transform.position, nagrodaNaZiemi.transform.position);
 
-        if (dist <= zasiegOdbioru && Input.GetKeyDown(klawiszOdbioru))
-            Odbierz();
+        if (dist <= zasiegOdbioru)
+        {
+            // Wyświetl podpowiedź pobrania, dopóki gracz stoi blisko przedmiotu
+            if (hintManager != null)
+            {
+                string nazwaPrzedmiotu = typNagrody == "bateria" ? "Akumulator" : "Świecę zapłonową";
+                hintManager.ShowHint($"Naciśnij <color=white>[ {klawiszOdbioru} ]</color> aby podnieść {nazwaPrzedmiotu}.", 0.2f);
+            }
+
+            if (Input.GetKeyDown(klawiszOdbioru))
+                Odbierz();
+        }
     }
 
     void Odbierz()
     {
         odebrano = true;
+        
+        if (hintManager != null && hintManager.hintPanel != null)
+            hintManager.hintPanel.SetActive(false);
+
         if (typNagrody == "bateria")
         {
-            if (model3DBaterii != null)
-                model3DBaterii.SetActive(true);
-
-            Ekwipunek.maAkumulator = true; // NOWE!
+            if (model3DBaterii != null) model3DBaterii.SetActive(true);
+            Ekwipunek.maAkumulator = true;
             Debug.Log("[NAGRODA] Akumulator dodany do ekwipunku!");
 
-            if (scoreManager != null)
-                scoreManager.CzyscTekstPoOdebraniuNagrody();
+            if (scoreManager != null) scoreManager.CzyscTekstPoOdebraniuNagrody();
         }
         else if (typNagrody == "swieca")
         {
-            if (model3DSwieca != null)
-                model3DSwieca.SetActive(true);
-
-            Ekwipunek.maSwiecaZaplonowa = true; // NOWE!
+            if (model3DSwieca != null) model3DSwieca.SetActive(true);
+            Ekwipunek.maSwiecaZaplonowa = true;
             Debug.Log("[NAGRODA] Świeca zapłonowa dodana do ekwipunku!");
 
-            if (puszkiManager != null)
-                puszkiManager.CzyscTekst();
+            if (puszkiManager != null) puszkiManager.CzyscTekst();
         }
         Destroy(nagrodaNaZiemi);
     }

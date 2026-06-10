@@ -1,11 +1,9 @@
 using UnityEngine;
-using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
     [Header("UI")]
     public bool isInThrowZone;
-    public TextMeshProUGUI tekstKomunikatowUI;
 
     [Header("Limity rzutów")]
     public int maxRzutowNaTarcze = 5;
@@ -27,7 +25,6 @@ public class ScoreManager : MonoBehaviour
     public GameObject prefabCzesciSamochodu;
     public Transform miejsceSpawnuNagrody;
 
-   
     [Header("Dźwięki")]
     public AudioSource glosnik;
     public AudioClip dzwiekRzutu;
@@ -35,49 +32,63 @@ public class ScoreManager : MonoBehaviour
     public AudioClip dzwiekWygranej;
     public AudioClip dzwiekPrzegranej;
 
+    private HintManager hintManager;
+    private string obecnyKomunikat = "";
+
     void Start()
     {
         isInThrowZone = false;
-
-        if (tekstKomunikatowUI != null)
-            tekstKomunikatowUI.gameObject.SetActive(false);
+        hintManager = Object.FindFirstObjectByType<HintManager>();
     }
 
     void Update()
     {
-        if (graSkonczona || blokadaTekstuTrafienia) return;
-
-        if (tekstKomunikatowUI != null)
+        if (graSkonczona)
         {
-            if (isInThrowZone && !instrukcjaJuzPokazana && !oddanoPierwszyRzut)
+            // Pozwól wyświetlać tekst o wygranej/przegranej zdefiniowany w metodach końcowych
+            if (hintManager != null && !string.IsNullOrEmpty(obecnyKomunikat))
             {
-                tekstKomunikatowUI.gameObject.SetActive(true);
-                tekstKomunikatowUI.text =
-                    "Rzuć nożem w środek każdej tarczy aby otrzymać nagrodę!\nNaciśnij G aby rzucić.";
+                hintManager.ShowHint(obecnyKomunikat, 0.5f);
+            }
+            return;
+        }
 
+        if (!blokadaTekstuTrafienia)
+        {
+            if (isInThrowZone && !oddanoPierwszyRzut)
+            {
+                obecnyKomunikat = "Rzuć nożem w środek każdej tarczy aby otrzymać nagrodę!\nNaciśnij G aby rzucić.";
                 instrukcjaJuzPokazana = true;
             }
             else if (!isInThrowZone && instrukcjaJuzPokazana && !oddanoPierwszyRzut)
             {
-                tekstKomunikatowUI.gameObject.SetActive(false);
+                obecnyKomunikat = "";
                 instrukcjaJuzPokazana = false;
+                UkryjPanelHinta();
             }
+        }
+
+        // Jeśli trwa wyświetlanie komunikatu o trafieniu (blokada), wymuszamy jego odświeżanie niezależnie od strefy
+        if (blokadaTekstuTrafienia && hintManager != null && !string.IsNullOrEmpty(obecnyKomunikat))
+        {
+            hintManager.ShowHint(obecnyKomunikat, 0.5f);
+        }
+        // W przeciwnym wypadku wyświetlamy instrukcję startową tylko w strefie rzutu
+        else if (isInThrowZone && hintManager != null && !string.IsNullOrEmpty(obecnyKomunikat))
+        {
+            hintManager.ShowHint(obecnyKomunikat, 0.5f);
         }
     }
 
-   
-  public void OdtworzDzwiekRzutu() 
-{ 
-    Debug.Log("PRÓBA ODTWORZENIA DŹWIĘKU RZUTU");
-    if (glosnik == null) Debug.LogError("BRAK AUDIO SOURCE!");
-    if (dzwiekRzutu == null) Debug.LogError("BRAK PLIKU DŹWIĘKOWEGO!");
-    
-    if (glosnik != null && dzwiekRzutu != null) 
-        glosnik.PlayOneShot(dzwiekRzutu); 
-}
+    public void OdtworzDzwiekRzutu() 
+    { 
+        if (glosnik != null && dzwiekRzutu != null) 
+            glosnik.PlayOneShot(dzwiekRzutu); 
+    }
     public void OdtworzDzwiekWbicia() { if (glosnik != null && dzwiekWbicia != null) glosnik.PlayOneShot(dzwiekWbicia); }
     public void OdtworzDzwiekWygranej() { if (glosnik != null && dzwiekWygranej != null) glosnik.PlayOneShot(dzwiekWygranej); } 
     public void OdtworzDzwiekPrzegranej() { if (glosnik != null && dzwiekPrzegranej != null) glosnik.PlayOneShot(dzwiekPrzegranej); } 
+
     public bool CzyMoznaRzucicWTarcze(int numerTarczy)
     {
         if (graSkonczona) return false;
@@ -96,9 +107,8 @@ public class ScoreManager : MonoBehaviour
         if (!oddanoPierwszyRzut)
         {
             oddanoPierwszyRzut = true;
-
-            if (tekstKomunikatowUI != null)
-                tekstKomunikatowUI.gameObject.SetActive(false);
+            obecnyKomunikat = "";
+            UkryjPanelHinta();
         }
 
         if (numerTarczy == 1) rzutyTarcza1++;
@@ -126,36 +136,31 @@ public class ScoreManager : MonoBehaviour
             return;
         }
 
-        int trafione =
-            System.Convert.ToInt32(srodekTarczy1) +
-            System.Convert.ToInt32(srodekTarczy2) +
-            System.Convert.ToInt32(srodekTarczy3);
+        int trafione = System.Convert.ToInt32(srodekTarczy1) + System.Convert.ToInt32(srodekTarczy2) + System.Convert.ToInt32(srodekTarczy3);
 
-        if (tekstKomunikatowUI != null)
+        blokadaTekstuTrafienia = true;
+        obecnyKomunikat = $"Trafiono środek tarczy {numerTarczy}!\nZostało jeszcze {3 - trafione} tarcz!";
+
+        // NATYCHMIASTOWE WYMUSZENIE POKAZANIA: Zapobiega jednoklatkowemu opóźnieniu z Update i ignoruje stan isInThrowZone
+        if (hintManager != null)
         {
-            blokadaTekstuTrafienia = true;
-            tekstKomunikatowUI.gameObject.SetActive(true);
-            tekstKomunikatowUI.text =
-                $"Trafiono środek tarczy {numerTarczy}!\nZostało jeszcze {3 - trafione} tarcz!";
-
-            CancelInvoke(nameof(UkryjKomunikat));
-            Invoke(nameof(UkryjKomunikat), 2f);
+            hintManager.ShowHint(obecnyKomunikat, 2.0f);
         }
+
+        CancelInvoke(nameof(UkryjKomunikat));
+        Invoke(nameof(UkryjKomunikat), 2f);
     }
 
     void UkryjKomunikat()
     {
         blokadaTekstuTrafienia = false;
-
-        if (tekstKomunikatowUI != null && !graSkonczona)
-            tekstKomunikatowUI.gameObject.SetActive(false);
+        obecnyKomunikat = "";
+        UkryjPanelHinta();
     }
 
     private void SprawdzWarunkiGry()
     {
-        if (rzutyTarcza1 >= maxRzutowNaTarcze &&
-            rzutyTarcza2 >= maxRzutowNaTarcze &&
-            rzutyTarcza3 >= maxRzutowNaTarcze)
+        if (rzutyTarcza1 >= maxRzutowNaTarcze && rzutyTarcza2 >= maxRzutowNaTarcze && rzutyTarcza3 >= maxRzutowNaTarcze)
         {
             if (!srodekTarczy1 || !srodekTarczy2 || !srodekTarczy3)
                 Przegrana();
@@ -169,23 +174,17 @@ public class ScoreManager : MonoBehaviour
         OdtworzDzwiekWygranej(); 
 
         CancelInvoke(nameof(UkryjKomunikat));
+        obecnyKomunikat = "<color=green>Brawo! Trafiłeś wszystkie środki!\nPodejdź do nagrody i naciśnij E!</color>";
 
-        if (tekstKomunikatowUI != null)
+        if (hintManager != null)
         {
-            tekstKomunikatowUI.gameObject.SetActive(true);
-            tekstKomunikatowUI.text =
-                "<color=green>Brawo! Trafiłeś wszystkie środki!\nPodejdź do nagrody i naciśnij E!</color>";
+            hintManager.ShowHint(obecnyKomunikat, 5.0f);
         }
 
         if (prefabCzesciSamochodu != null && miejsceSpawnuNagrody != null)
         {
-            GameObject nagroda = Instantiate(
-                prefabCzesciSamochodu,
-                miejsceSpawnuNagrody.position,
-                miejsceSpawnuNagrody.rotation
-            );
-
-            OdbierzNagrode skryptOdbioru = FindFirstObjectByType<OdbierzNagrode>();
+            GameObject nagroda = Instantiate(prefabCzesciSamochodu, miejsceSpawnuNagrody.position, miejsceSpawnuNagrody.rotation);
+            OdbierzNagrode skryptOdbioru = Object.FindFirstObjectByType<OdbierzNagrode>();
 
             if (skryptOdbioru != null)
                 skryptOdbioru.UstawNagrodeNaZiemi(nagroda);
@@ -196,11 +195,8 @@ public class ScoreManager : MonoBehaviour
 
     public void CzyscTekstPoOdebraniuNagrody()
     {
-        if (tekstKomunikatowUI != null)
-        {
-            tekstKomunikatowUI.text = "";
-            tekstKomunikatowUI.gameObject.SetActive(false);
-        }
+        obecnyKomunikat = "";
+        UkryjPanelHinta();
     }
 
     void Przegrana()
@@ -210,38 +206,36 @@ public class ScoreManager : MonoBehaviour
         OdtworzDzwiekPrzegranej(); 
 
         CancelInvoke(nameof(UkryjKomunikat));
+        obecnyKomunikat = "<color=red>Nie trafiłeś wszystkich środków!\nSpróbuj ponownie...</color>";
 
-        if (tekstKomunikatowUI != null)
+        if (hintManager != null)
         {
-            tekstKomunikatowUI.gameObject.SetActive(true);
-            tekstKomunikatowUI.text =
-                "<color=red>Nie trafiłeś wszystkich środków!\nSpróbuj ponownie...</color>";
+            hintManager.ShowHint(obecnyKomunikat, 3.0f);
         }
 
         Invoke(nameof(ResetujGre), 3f);
     }
 
+    private void UkryjPanelHinta()
+    {
+        if (hintManager != null && hintManager.hintPanel != null)
+            hintManager.hintPanel.SetActive(false);
+    }
+
     public void ResetujGre()
     {
         GameObject[] noze = GameObject.FindGameObjectsWithTag("Projectile");
+        foreach (GameObject noz in noze) Destroy(noz);
 
-        foreach (GameObject noz in noze)
-            Destroy(noz);
-
-        rzutyTarcza1 = 0;
-        rzutyTarcza2 = 0;
-        rzutyTarcza3 = 0;
-
-        srodekTarczy1 = false;
-        srodekTarczy2 = false;
-        srodekTarczy3 = false;
+        rzutyTarcza1 = 0; rzutyTarcza2 = 0; rzutyTarcza3 = 0;
+        srodekTarczy1 = false; srodekTarczy2 = false; srodekTarczy3 = false;
 
         graSkonczona = false;
         oddanoPierwszyRzut = false;
         instrukcjaJuzPokazana = false;
         blokadaTekstuTrafienia = false;
+        obecnyKomunikat = "";
 
-        if (tekstKomunikatowUI != null)
-            tekstKomunikatowUI.gameObject.SetActive(false);
+        UkryjPanelHinta();
     }
 }

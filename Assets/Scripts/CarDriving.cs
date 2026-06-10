@@ -107,8 +107,7 @@ public class CarDriving : MonoBehaviour
             cr.GraczWysiadl();
             cr.blokadaWsiadania = true;
             cr.czasBlokady = 0.5f;
-            if (cr.interactionText != null)
-                cr.interactionText.gameObject.SetActive(true);
+            
         }
     }
 }
