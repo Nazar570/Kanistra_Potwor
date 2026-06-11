@@ -1,0 +1,212 @@
+
+# 2026-06-10 14:19:16.165623
++Działaj jako doświadczony programista Unity C# i projektant gier. Moi koledzy z zespołu zwrócili mi uwagę, że w grze brakuje zawartości i celów. Muszę zaimplementować kilka kluczowych mechanik, aby domknąć główną pętlę rozgrywki (gameplay loop) i mieć konkretne zadania do wykonania w nadchodzących commitach na Git.
++
++Przeanalizuj kontekst mojego projektu (szczególnie to, jak działają triggery, wykrywanie gracza oraz efekt fade/ciemnienia ekranu UI) i pomóż mi stworzyć następujące systemy:
++
++1. SYSTEM PODPOWIEDZI I CELÓW W ASYLUM:
++- Kiedy gracz budzi się w Asylum (zaraz po tym, jak skrypt BedStartSystem kończy swoje działanie), wyświetl na ekranie tekst UI z celem (np. "Cel: Znajdź część zamienną, aby naprawić samochód i uciec").
++- Tekst powinien ładnie pojawiać się przez Fade-in, zostać na ekranie przez kilka sekund lub wisieć w rogu ekranu jako przypomnienie.
++- Stwórz uniwersalny, prosty skrypt do podpowiedzi, który będę mógł rozłożyć w innych miejscach Asylum (np. po podejściu do zamkniętych drzwi wyświetli się tekst: "Wygląda na to, że potrzebuję klucza...").
++
++2. SEKWENCJA ZAKOŃCZENIA GRY (WARUNEK WYGRANEJ):
++- Stwórz skrypt EndGameTrigger, który będę mógł umieścić na zewnątrz budynku, blisko czerwonego samochodu.
++- Kiedy gracz wróci do samochodu (po ukończeniu sekwencji w Asylum) i wejdzie w ten trigger, zablokuj ruch gracza (wyłącz FirstPersonController).
++- Uruchom ściemnianie ekranu do czerni (UI Fade to Black) – możesz użyć istniejącego systemu/obrazka fade.
++- Po pełnym ściemnieniu, wyświetl ekran końcowy "Wygrana / Dzięki za grę!" wraz z przyciskami do zresetowania gry (Restart) lub wyjścia do Menu Głównego (Quit).
++
++Proszę o dostarczenie:
++1. Przewodnika wdrożenia krok po kroku.
++2. Czystych, dobrze skomentowanych skryptów C# zoptymalizowanych pod Unity 6 oraz Starter Assets First Person Controller.
++3. Propozycji czystego podziału na wiadomości commitów na Git (np. w formacie Conventional Commits, jak 'feat(ui): add objective system'), abym mógł commitować swoją pracę progresywnie, krok po kroku.
+
+# 2026-06-10 14:20:00.532283
++aider --list-models openrouter/
+
+# 2026-06-10 14:20:08.921830
++aider --model openrouter/google/gemma-3-27b-it:free
+
+# 2026-06-10 14:20:16.545694
++aider --model openrouter/meta-llama/llama-3.3-70b-instruct:free
+
+# 2026-06-10 14:21:35.509596
++Działaj jako doświadczony programista Unity C# i projektant gier. Moi koledzy z zespołu zwrócili mi uwagę, że w grze brakuje zawartości i celów. Muszę zaimplementować kilka kluczowych mechanik, aby domknąć główną pętlę rozgrywki (gameplay loop) i mieć konkretne zadania do wykonania w nadchodzących commitach na Git.
++
++Przeanalizuj kontekst mojego projektu (szczególnie to, jak działają triggery, wykrywanie gracza oraz efekt fade/ciemnienia ekranu UI) i pomóż mi stworzyć następujące systemy:
++
++1. SYSTEM PODPOWIEDZI I CELÓW W ASYLUM:
++- Kiedy gracz budzi się w Asylum (zaraz po tym, jak skrypt BedStartSystem kończy swoje działanie), wyświetl na ekranie tekst UI z celem (np. "Cel: Znajdź część zamienną, aby naprawić samochód i uciec").
++- Tekst powinien ładnie pojawiać się przez Fade-in, zostać na ekranie przez kilka sekund lub wisieć w rogu ekranu jako przypomnienie.
++- Stwórz uniwersalny, prosty skrypt do podpowiedzi, który będę mógł rozłożyć w innych miejscach Asylum (np. po podejściu do zamkniętych drzwi wyświetli się tekst: "Wygląda na to, że potrzebuję klucza...").
++
++2. SEKWENCJA ZAKOŃCZENIA GRY (WARUNEK WYGRANEJ):
++- Stwórz skrypt EndGameTrigger, który będę mógł umieścić na zewnątrz budynku, blisko czerwonego samochodu.
++- Kiedy gracz wróci do samochodu (po ukończeniu sekwencji w Asylum) i wejdzie w ten trigger, zablokuj ruch gracza (wyłącz FirstPersonController).
++- Uruchom ściemnianie ekranu do czerni (UI Fade to Black) – możesz użyć istniejącego systemu/obrazka fade.
++- Po pełnym ściemnieniu, wyświetl ekran końcowy "Wygrana / Dzięki za grę!" wraz z przyciskami do zresetowania gry (Restart) lub wyjścia do Menu Głównego (Quit).
++
++Proszę o dostarczenie:
++1. Przewodnika wdrożenia krok po kroku.
++2. Czystych, dobrze skomentowanych skryptów C# zoptymalizowanych pod Unity 6 oraz Starter Assets First Person Controller.
++3. Propozycji czystego podziału na wiadomości commitów na Git (np. w formacie Conventional Commits, jak 'feat(ui): add objective system'), abym mógł commitować swoją pracę progresywnie, krok po kroku.
+
+# 2026-06-10 14:22:45.657406
++no
+
+# 2026-06-10 14:22:56.125784
++Działaj jako doświadczony programista Unity C# i projektant gier. Moi koledzy z zespołu zwrócili mi uwagę, że w grze brakuje zawartości i celów. Muszę zaimplementować kilka kluczowych mechanik, aby domknąć główną pętlę rozgrywki (gameplay loop) i mieć konkretne zadania do wykonania w nadchodzących commitach na Git.
++
++Przeanalizuj kontekst mojego projektu (szczególnie to, jak działają triggery, wykrywanie gracza oraz efekt fade/ciemnienia ekranu UI) i pomóż mi stworzyć następujące systemy:
++
++1. SYSTEM PODPOWIEDZI I CELÓW W ASYLUM:
++- Kiedy gracz budzi się w Asylum (zaraz po tym, jak skrypt BedStartSystem kończy swoje działanie), wyświetl na ekranie tekst UI z celem (np. "Cel: Znajdź część zamienną, aby naprawić samochód i uciec").
++- Tekst powinien ładnie pojawiać się przez Fade-in, zostać na ekranie przez kilka sekund lub wisieć w rogu ekranu jako przypomnienie.
++- Stwórz uniwersalny, prosty skrypt do podpowiedzi, który będę mógł rozłożyć w innych miejscach Asylum (np. po podejściu do zamkniętych drzwi wyświetli się tekst: "Wygląda na to, że potrzebuję klucza...").
++
++2. SEKWENCJA ZAKOŃCZENIA GRY (WARUNEK WYGRANEJ):
++- Stwórz skrypt EndGameTrigger, który będę mógł umieścić na zewnątrz budynku, blisko czerwonego samochodu.
++- Kiedy gracz wróci do samochodu (po ukończeniu sekwencji w Asylum) i wejdzie w ten trigger, zablokuj ruch gracza (wyłącz FirstPersonController).
++- Uruchom ściemnianie ekranu do czerni (UI Fade to Black) – możesz użyć istniejącego systemu/obrazka fade.
++- Po pełnym ściemnieniu, wyświetl ekran końcowy "Wygrana / Dzięki za grę!" wraz z przyciskami do zresetowania gry (Restart) lub wyjścia do Menu Głównego (Quit).
++
++Proszę o dostarczenie:
++1. Przewodnika wdrożenia krok po kroku.
++2. Czystych, dobrze skomentowanych skryptów C# zoptymalizowanych pod Unity 6 oraz Starter Assets First Person Controller.
++3. Propozycji czystego podziału na wiadomości commitów na Git (np. w formacie Conventional Commits, jak 'feat(ui): add objective system'), abym mógł commitować swoją pracę progresywnie, krok po kroku.
+
+# 2026-06-10 14:24:06.454245
++no
+
+# 2026-06-10 14:24:34.288228
++Działaj jako doświadczony programista Unity C# i projektant gier. Moi koledzy z zespołu zwrócili mi uwagę, że w grze brakuje zawartości i celów. Muszę zaimplementować kilka kluczowych mechanik, aby domknąć główną pętlę rozgrywki (gameplay loop) i mieć konkretne zadania do wykonania w nadchodzących commitach na Git.
++
++Przeanalizuj kontekst mojego projektu (szczególnie to, jak działają triggery, wykrywanie gracza oraz efekt fade/ciemnienia ekranu UI) i pomóż mi stworzyć następujące systemy:
++
++1. SYSTEM PODPOWIEDZI I CELÓW W ASYLUM:
++- Kiedy gracz budzi się w Asylum (zaraz po tym, jak skrypt BedStartSystem kończy swoje działanie), wyświetl na ekranie tekst UI z celem (np. "Cel: Znajdź część zamienną, aby naprawić samochód i uciec").
++- Tekst powinien ładnie pojawiać się przez Fade-in, zostać na ekranie przez kilka sekund lub wisieć w rogu ekranu jako przypomnienie.
++- Stwórz uniwersalny, prosty skrypt do podpowiedzi, który będę mógł rozłożyć w innych miejscach Asylum (np. po podejściu do zamkniętych drzwi wyświetli się tekst: "Wygląda na to, że potrzebuję klucza...").
++
++2. SEKWENCJA ZAKOŃCZENIA GRY (WARUNEK WYGRANEJ):
++- Stwórz skrypt EndGameTrigger, który będę mógł umieścić na zewnątrz budynku, blisko czerwonego samochodu.
++- Kiedy gracz wróci do samochodu (po ukończeniu sekwencji w Asylum) i wejdzie w ten trigger, zablokuj ruch gracza (wyłącz FirstPersonController).
++- Uruchom ściemnianie ekranu do czerni (UI Fade to Black) – możesz użyć istniejącego systemu/obrazka fade.
++- Po pełnym ściemnieniu, wyświetl ekran końcowy "Wygrana / Dzięki za grę!" wraz z przyciskami do zresetowania gry (Restart) lub wyjścia do Menu Głównego (Quit).
++
++Proszę o dostarczenie:
++1. Przewodnika wdrożenia krok po kroku.
++2. Czystych, dobrze skomentowanych skryptów C# zoptymalizowanych pod Unity 6 oraz Starter Assets First Person Controller.
++3. Propozycji czystego podziału na wiadomości commitów na Git (np. w formacie Conventional Commits, jak 'feat(ui): add objective system'), abym mógł commitować swoją pracę progresywnie, krok po kroku.
+
+# 2026-06-10 14:27:19.149907
++yes
+
+# 2026-06-10 14:27:48.681845
++Działaj jako doświadczony programista Unity C# i projektant gier. Moi koledzy z zespołu zwrócili mi uwagę, że w grze brakuje zawartości i celów. Muszę zaimplementować kilka kluczowych mechanik, aby domknąć główną pętlę rozgrywki (gameplay loop) i mieć konkretne zadania do wykonania w nadchodzących commitach na Git.
++
++Przeanalizuj kontekst mojego projektu (szczególnie to, jak działają triggery, wykrywanie gracza oraz efekt fade/ciemnienia ekranu UI) i pomóż mi stworzyć następujące systemy:
++
++1. SYSTEM PODPOWIEDZI I CELÓW W ASYLUM:
++- Kiedy gracz budzi się w Asylum (zaraz po tym, jak skrypt BedStartSystem kończy swoje działanie), wyświetl na ekranie tekst UI z celem (np. "Cel: Znajdź część zamienną, aby naprawić samochód i uciec").
++- Tekst powinien ładnie pojawiać się przez Fade-in, zostać na ekranie przez kilka sekund lub wisieć w rogu ekranu jako przypomnienie.
++- Stwórz uniwersalny, prosty skrypt do podpowiedzi, który będę mógł rozłożyć w innych miejscach Asylum (np. po podejściu do zamkniętych drzwi wyświetli się tekst: "Wygląda na to, że potrzebuję klucza...").
++
++2. SEKWENCJA ZAKOŃCZENIA GRY (WARUNEK WYGRANEJ):
++- Stwórz skrypt EndGameTrigger, który będę mógł umieścić na zewnątrz budynku, blisko czerwonego samochodu.
++- Kiedy gracz wróci do samochodu (po ukończeniu sekwencji w Asylum) i wejdzie w ten trigger, zablokuj ruch gracza (wyłącz FirstPersonController).
++- Uruchom ściemnianie ekranu do czerni (UI Fade to Black) – możesz użyć istniejącego systemu/obrazka fade.
++- Po pełnym ściemnieniu, wyświetl ekran końcowy "Wygrana / Dzięki za grę!" wraz z przyciskami do zresetowania gry (Restart) lub wyjścia do Menu Głównego (Quit).
++
++Proszę o dostarczenie:
++1. Przewodnika wdrożenia krok po kroku.
++2. Czystych, dobrze skomentowanych skryptów C# zoptymalizowanych pod Unity 6 oraz Starter Assets First Person Controller.
++3. Propozycji czystego podziału na wiadomości commitów na Git (np. w formacie Conventional Commits, jak 'feat(ui): add objective system'), abym mógł commitować swoją pracę progresywnie, krok po kroku.
+
+# 2026-06-10 14:28:50.872591
++y
+
+# 2026-06-10 14:30:09.662929
++using UnityEngine;
++using StarterAssets;
++
++public class BedStartSystem : MonoBehaviour
++{
++    [Header("Skrypt First Person Controller z PlayerCapsule")]
++    public FirstPersonController skryptKontrolera;
++
++    [Header("Ile sekund trwa wstawanie?")]
++    public float czasWstawania = 2f;
++
++    private Transform cameraRoot;
++    private bool czyTrwaWstawanie = false;
++    private float timer = 0f;
++
++    void OnEnable()
++    {
++        // Szukamy obiektu odpowiedzialnego za obrót kamery w dzieciach gracza
++        cameraRoot = transform.Find("PlayerCameraRoot");
++
++        if (skryptKontrolera != null) 
++        {
++            // 1. Blokujemy sterowanie kontrolera na starcie pobudki
++            skryptKontrolera.enabled = false;
++            
++            // 2. Jeśli znaleźliśmy kamerę, od razu wymuszamy obrót pionowo w sufit (-90)
++            if (cameraRoot != null)
++            {
++                cameraRoot.localRotation = Quaternion.Euler(-90f, 0f, 0f);
++            }
++            
++            timer = 0f;
++            czyTrwaWstawanie = true;
++            Debug.Log("[BedStartSystem] Rozpoczęto wstawanie. Wzrok skierowany w sufit (-90).");
++        }
++    }
++
++    void Update()
++    {
++        if (czyTrwaWstawanie)
++        {
++            // Zabezpieczenie: cały czas trzymamy kontroler wyłączony, dopóki trwa animacja
++            if (skryptKontrolera != null) skryptKontrolera.enabled = false;
++
++            timer += Time.deltaTime;
++            float progres = timer / czasWstawania;
++
++            // Płynny ruch rotacji: od sufitu (-90f) do poziomu przed siebie (0f)
++            float aktualnyKat = Mathf.Lerp(-90f, 0f, progres);
++
++            if (cameraRoot != null)
++            {
++                cameraRoot.localRotation = Quaternion.Euler(aktualnyKat, 0f, 0f);
++            }
++
++            if (timer >= czasWstawania)
++            {
++                czyTrwaWstawanie = false;
++                
++                // Animacja skończona -> zerujemy ostatecznie obrót kamery i włączamy sterowanie
++                if (cameraRoot != null) cameraRoot.localRotation = Quaternion.Euler(0f, 0f, 0f);
++                if (skryptKontrolera != null) skryptKontrolera.enabled = true; 
++                
++                Debug.Log("[BedStartSystem] Gracz wstał, sterowanie odblokowane!");
++                this.enabled = false; // Skrypt sam się wyłącza
++            }
++        }
++    }
++}
+
+# 2026-06-10 14:52:29.139788
++podaj mi pełny BedStartSystem
+
+# 2026-06-10 14:52:34.119503
++no
+
+# 2026-06-10 14:52:39.777681
++yes
+
+# 2026-06-10 14:53:16.811868
++niechce komitowac wróc
+
+# 2026-06-10 14:54:37.761854
++nie rób komitu wróc komit

@@ -176,6 +176,12 @@ public GameObject mutantBezposredni;
         wAucie = false;
     }
 
+    // Publiczna właściwość do sprawdzenia czy samochód jest gotowy do ucieczki
+    public bool SamochodGotowy
+    {
+        get { return akumulatorZalozony && swiecaZalozona && kanisterZalany; }
+    }
+
     void AktualizujHintWUpdate()
     {
         if (hintManager == null) return;
